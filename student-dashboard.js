@@ -24,11 +24,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const seedData = window.__APP_DATA__ || {};
+
     const studentProfile = {
-        name: 'John Doe',
-        studentNumber: '2021-12345',
-        courseNumber: 'BSCS-3A',
-        email: 'john.doe@email.com'
+        name: seedData.studentProfile?.name || 'Student',
+        studentNumber: seedData.studentProfile?.studentNumber || '',
+        courseNumber: seedData.studentProfile?.courseNumber || '',
+        email: seedData.studentProfile?.email || '',
+        courseProgram: seedData.studentProfile?.courseProgram || '',
+        yearLevel: seedData.studentProfile?.yearLevel || null,
+        classSection: seedData.studentProfile?.classSection || null
     };
 
     const modules = {
@@ -37,80 +42,23 @@ document.addEventListener('DOMContentLoaded', () => {
         settings: renderSettingsModule
     };
 
-    const evaluationCourses = [
-        {
-            id: 1,
-            name: 'Chemistry',
-            professors: [
-                {
-                    id: 101,
-                    name: 'Dr. Denise Alia Sernande',
-                    photo: 'assets/pfp_professor/pfp2.png',
-                    department: 'Chemistry Department',
-                    courses: ['Chemistry'],
-                    assignedCourseNumbers: ['BSCS-3A', 'BSCS-3B']
-                },
-                {
-                    id: 102,
-                    name: 'Prof. Jane Johnson',
-                    photo: 'assets/images/professors/prof-johnson.jpg',
-                    department: 'Chemistry Department',
-                    courses: ['Chemistry'],
-                    assignedCourseNumbers: ['BSIT-2A', 'BSIT-2B']
-                }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Application Development',
-            professors: [
-                {
-                    id: 201,
-                    name: 'Dr. Julia Chloe Fornal',
-                    photo: 'assets/pfp_professor/pfp1.png',
-                    department: 'Software Engineering Department',
-                    courses: ['Application Development', 'Software Engineering Practices'],
-                    assignedCourseNumbers: ['BSCS-3A']
-                },
-                {
-                    id: 202,
-                    name: 'Prof. Daniel Brown',
-                    photo: '',
-                    department: 'Information Technology Department',
-                    courses: ['Application Development'],
-                    assignedCourseNumbers: ['BSIT-2B']
-                }
-            ]
-        },
-        {
-            id: 3,
-            name: 'Data Science Fundamentals',
-            professors: [
-                {
-                    id: 301,
-                    name: 'Dr. Felix Carter',
-                    photo: 'assets/images/professors/dr-carter.jpg',
-                    department: 'Data Science Department',
-                    courses: ['Data Science Fundamentals', 'Machine Learning 101'],
-                    assignedCourseNumbers: ['BSDS-2A', 'BSDS-2B']
-                }
-            ]
-        },
-        {
-            id: 4,
-            name: 'Technical Writing',
-            professors: [
-                {
-                    id: 401,
-                    name: 'Dr. Juztine Carl Obien',
-                    photo: 'assets/pfp_professor/pfp3.jfif',
-                    department: 'Communications Department',
-                    courses: ['Technical Writing'],
-                    assignedCourseNumbers: ['BSCS-3A', 'BSIT-2B']
-                }
-            ]
-        }
-    ];
+    const evaluationCourses = Array.isArray(seedData.evaluationCourses) && seedData.evaluationCourses.length
+        ? seedData.evaluationCourses
+        : [];
+
+    const defaultSettings = {
+        receiveEmailReminders: true,
+        notifyPeriodClose: true,
+        profileVisibleToFaculty: true,
+        submitAnonymously: true,
+        themePreference: 'light',
+        languagePreference: 'en'
+    };
+
+    const userSettings = {
+        ...defaultSettings,
+        ...(seedData.userSettings || {})
+    };
 
     const likertOptions = [
         { value: '1', label: '1 - Very Dissatisfied' },
@@ -175,6 +123,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const studentNumberDisplay = formatProfileValue(studentProfile.studentNumber);
         const courseNumberDisplay = formatProfileValue(studentProfile.courseNumber);
         const emailDisplay = formatProfileValue(studentProfile.email);
+        const courseProgramDisplay = formatProfileValue(studentProfile.courseProgram);
+        const yearLevelDisplay = typeof studentProfile.yearLevel === 'number'
+            ? `Year ${studentProfile.yearLevel}`
+            : formatProfileValue('');
+        const classSectionDisplay = studentProfile.classSection?.code
+            ? `${studentProfile.classSection.code}${studentProfile.classSection.yearLevel ? ` • Year ${studentProfile.classSection.yearLevel}` : ''}`
+            : formatProfileValue('');
 
         content.innerHTML = `
             <section class="profile-summary">
@@ -203,6 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="profile-value">${emailDisplay}</span>
                         </div>
                         <div class="profile-info-item">
+                            <span class="profile-label">Program</span>
+                            <span class="profile-value">${courseProgramDisplay}</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-label">Year Level</span>
+                            <span class="profile-value">${yearLevelDisplay}</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-label">Class Section</span>
+                            <span class="profile-value">${classSectionDisplay}</span>
+                        </div>
+                        <div class="profile-info-item">
                             <span class="profile-label">Course Access</span>
                             <span class="profile-badge">Evaluate professors assigned to ${courseNumberDisplay}</span>
                         </div>
@@ -220,78 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <section class="settings-summary">
                 <article class="module-card settings-card">
                     <h2>Account Settings</h2>
-                    <p class="settings-helper">Manage your account preferences and security settings.</p>
+                    <p class="settings-helper">Customize your account preferences and settings.</p>
                     
-                    <div class="settings-section">
-                        <h3>Notifications</h3>
-                        <div class="setting-item">
-                            <label for="email-notifications">
-                                <input type="checkbox" id="email-notifications" checked>
-                                <span>Email notifications for evaluation reminders</span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <label for="evaluation-complete">
-                                <input type="checkbox" id="evaluation-complete" checked>
-                                <span>Notify when evaluation period ends</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="settings-section">
-                        <h3>Privacy</h3>
-                        <div class="setting-item">
-                            <label for="profile-visibility">
-                                <input type="checkbox" id="profile-visibility" checked>
-                                <span>Show profile to professors</span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <label for="anonymous-evaluations">
-                                <input type="checkbox" id="anonymous-evaluations" checked>
-                                <span>Submit evaluations anonymously</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="settings-section">
-                        <h3>Appearance</h3>
-                        <div class="setting-item">
-                            <label for="theme">Theme</label>
-                            <select id="theme">
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
-                                <option value="auto">Auto</option>
-                            </select>
-                        </div>
-                        <div class="setting-item">
-                            <label for="language">Language</label>
-                            <select id="language">
-                                <option value="en">English</option>
-                                <option value="es">Español</option>
-                                <option value="fr">Français</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="settings-actions">
-                        <button class="btn btn-outline" type="button" id="settings-reset">Reset to Defaults</button>
-                        <button class="btn btn-primary" type="button" id="settings-save">Save Changes</button>
-                    </div>
+                    <!-- New settings content will go here -->
                     
-                    <p class="form-feedback" aria-live="polite"></p>
-                </article>
-
-                <article class="module-card settings-card">
-                    <h3>Security</h3>
-                    <div class="settings-section">
-                        <div class="setting-item">
-                            <button class="btn btn-outline" type="button" id="change-password">Change Password</button>
-                        </div>
-                        <div class="setting-item">
-                            <button class="btn btn-outline" type="button" id="two-factor">Enable Two-Factor Authentication</button>
-                        </div>
-                    </div>
                 </article>
             </section>
         `;
@@ -303,11 +202,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
-                // Simulate saving settings
+                const updatedSettings = {
+                    receiveEmailReminders: Boolean(content.querySelector('#email-notifications')?.checked),
+                    notifyPeriodClose: Boolean(content.querySelector('#evaluation-complete')?.checked),
+                    profileVisibleToFaculty: Boolean(content.querySelector('#profile-visibility')?.checked),
+                    submitAnonymously: Boolean(content.querySelector('#anonymous-evaluations')?.checked),
+                    themePreference: content.querySelector('#theme')?.value || defaultSettings.themePreference,
+                    languagePreference: content.querySelector('#language')?.value || defaultSettings.languagePreference
+                };
+
+                Object.assign(userSettings, updatedSettings);
+
                 feedback.textContent = 'Settings saved successfully!';
                 feedback.classList.remove('form-feedback--error');
                 
-                // Clear feedback after 3 seconds
                 setTimeout(() => {
                     feedback.textContent = '';
                 }, 3000);
@@ -322,14 +230,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     const selects = content.querySelectorAll('select');
                     
                     checkboxes.forEach(checkbox => {
-                        checkbox.checked = checkbox.id === 'email-notifications' || checkbox.id === 'evaluation-complete' || checkbox.id === 'profile-visibility' || checkbox.id === 'anonymous-evaluations';
+                        switch (checkbox.id) {
+                            case 'email-notifications':
+                                checkbox.checked = defaultSettings.receiveEmailReminders;
+                                break;
+                            case 'evaluation-complete':
+                                checkbox.checked = defaultSettings.notifyPeriodClose;
+                                break;
+                            case 'profile-visibility':
+                                checkbox.checked = defaultSettings.profileVisibleToFaculty;
+                                break;
+                            case 'anonymous-evaluations':
+                                checkbox.checked = defaultSettings.submitAnonymously;
+                                break;
+                            default:
+                                checkbox.checked = false;
+                        }
                     });
                     
                     selects.forEach(select => {
-                        if (select.id === 'theme') select.value = 'light';
-                        if (select.id === 'language') select.value = 'en';
+                        if (select.id === 'theme') select.value = defaultSettings.themePreference;
+                        if (select.id === 'language') select.value = defaultSettings.languagePreference;
                     });
                     
+                    Object.assign(userSettings, defaultSettings);
+
                     feedback.textContent = 'Settings reset to defaults';
                     feedback.classList.remove('form-feedback--error');
                     
@@ -505,8 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const accessibleProfessors = getEvaluableProfessors(course, studentProfile.courseNumber);
         const restrictedProfessors = course.professors.filter(prof => !accessibleProfessors.includes(prof));
 
+        const accessibleCount = accessibleProfessors.length;
+        const totalProfessors = course.professors.length;
+
         updateBreadcrumb(['Courses', course.name, `Your Class (${studentProfile.courseNumber})`, 'Professors']);
-        helperText.textContent = accessibleProfessors.length
+        helperText.textContent = accessibleCount
             ? `Showing professors assigned to ${studentProfile.courseNumber} for ${course.name}.`
             : `No professors assigned to ${studentProfile.courseNumber} for ${course.name}.`;
         backButton.hidden = false;
@@ -514,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const summaryCard = `
             <div class="module-card evaluation-summary">
                 <h3>${course.name}</h3>
-                <p class="evaluation-meta">${accessibleProfessors.length} of ${course.professors.length} professors available to you</p>
+                <p class="evaluation-meta">${accessibleCount} of ${totalProfessors} professors available to you</p>
             </div>`;
 
         const accessibleMarkup = accessibleProfessors.length
@@ -646,7 +574,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        form.addEventListener('submit', event => handleEvaluationSubmit(event, likertGroupState));
+        form.addEventListener('submit', event => handleEvaluationSubmit(event, likertGroupState, course, professor));
+
         resetBtn.addEventListener('click', () => {
             form.reset();
             const feedback = form.querySelector('.form-feedback');

@@ -26,10 +26,9 @@
             </button>
             <nav aria-label="Primary" class="nav">
                 <ul class="nav-list">
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#features">Key Features</a></li>
-                    <li><a href="#workflow">Workflow</a></li>
-                    <li><a href="#modules">Modules</a></li>
+                    <li><a href="#overview">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#vision-mission">About</a></li>
                 </ul>
                 <a class="login-btn" href="login.php">Login</a>
             </nav>
@@ -51,161 +50,98 @@
                     <a class="secondary-btn" href="#workflow">See How It Works</a>
                 </div>
             </div>
-            <aside class="hero-card" aria-label="Solution highlights">
-                <h3>Why institutions choose our solution</h3>
-                <ul class="checklist">
-                    <li>AI-driven sentiment analysis for feedback evaluation</li>
-                    <li>Automated student assistant application and tracking</li>
-                    <li>Real-time communication between students, supervisors, and administrators</li>
-                </ul>
-                <div class="hero-stats">
-                    <div class="hero-stat">
-                        <strong>60%</strong>
-                        Faster application review cycle
-                    </div>
-                    <div class="hero-stat">
-                        <strong>24/7</strong>
-                        Self-service support center
-                    </div>
-                    <div class="hero-stat">
-                        <strong>360°</strong>
-                        Engagement visibility
-                    </div>
+            <aside class="hero-card institutional-card" aria-label="Institutional representation statement">
+                <div class="institutional-card__seal" aria-hidden="true">
+                    <img src="favicon/android-chrome-192x192.png" alt="Dasmariñas Integrated High School seal watermark" />
                 </div>
+                <h3>Institutional Representation</h3>
+                <p>
+                    This system is developed exclusively for Dasmariñas Integrated High School to support a modern, data-driven faculty evaluation process. It transforms student feedback into actionable insights that promote continuous teaching improvement and institutional excellence.
+                </p>
             </aside>
         </section>
 
-        <section id="overview" class="page-wrapper">
-            <div class="section-heading">
-                <h2>Meet the Administrator &amp; Faculty Members</h2>
-                <p>Transform the manual student assistant program into a transparent, efficient, and data-driven experience for both students and administrators.</p>
-            </div>
-            <div class="split-section">
-                <article class="card">
-                    <h3>The Challenge</h3>
+        <section id="overview" class="page-wrapper achievements">
+            <div class="achievements-wrapper">
+                <figure class="achievements-visual" aria-labelledby="overview-title">
+                    <div class="achievements-visual__shape achievements-visual__shape--primary" aria-hidden="true"></div>
+                    <div class="achievements-visual__shape achievements-visual__shape--secondary" aria-hidden="true"></div>
+                    <img src="assets/Students-classroom.jpg" alt="Administrator celebrating a milestone" />
+                </figure>
+                <div class="achievements-copy">
+                    <p class="achievements-eyebrow">Student and Faculty Problem Faces</p>
+                    <h2 id="overview-title">Transforming Faculty Evaluation Challenges into Opportunities</h2>
                     <p class="muted-text">
-                        Existing application and support workflows rely on paper forms, siloed communication, and fragmented monitoring. This often leads to delayed placements, incomplete documentation, and limited visibility of student assistant support outcomes.
+                        Faculty evaluations should drive improvement, not create bottlenecks. Yet many institutions still rely on outdated processes that delay feedback, fragment data, and provide limited actionable insights—ultimately hindering both faculty development and institutional excellence.
                     </p>
-                </article>
-                <article class="card">
-                    <h3>The Solution</h3>
-                    <p class="muted-text">
-                        Our web-based system digitizes end-to-end processes—allowing students to apply, get matched, and receive support seamlessly while administrators orchestrate approvals, documentation, and analytics in one place.
-                    </p>
-                    <ul class="pill-list" aria-label="Core outcomes">
-                        <li>Centralized Application Portal</li>
-                        <li>Real-time Status Tracking</li>
-                        <li>Support Services Directory</li>
-                        <li>Performance Dashboards</li>
-                    </ul>
-                </article>
+                    <div class="problem-indicator__grid" role="list">
+                        <article class="problem-card" role="listitem">
+                            <span class="problem-card__badge">01</span>
+                            <p>Manual Processing.</p>
+                        </article>
+                        <article class="problem-card" role="listitem">
+                            <span class="problem-card__badge">02</span>
+                            <p>Delayed Feedback.</p>
+                        </article>
+                        <article class="problem-card" role="listitem">
+                            <span class="problem-card__badge">03</span>
+                            <p>Scattered Data.</p>
+                        </article>
+                        <article class="problem-card" role="listitem">
+                            <span class="problem-card__badge">04</span>
+                            <p>Limited Insight.</p>
+                        </article>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section id="features" class="page-wrapper features">
             <div class="section-heading">
-                <h2>Key Capabilities</h2>
-                <p>Designed to delight students, streamline coordinators’ workload, and inform decision-makers.</p>
+                <h2>What We Offer</h2>
+                <p>Supporting institutional decision-making through standardized evaluation and actionable feedback.</p>
             </div>
             <div class="features-grid">
                 <article class="feature-card">
                     <div class="feature-icon">1</div>
-                    <h3>Smart Application Intake</h3>
-                    <p>Guided forms, eligibility checks, and required document uploads ensure complete submissions the first time.</p>
+                    <h3>Faculty Evaluation</h3>
+                    <p>A standardized, web-based evaluation process that allows students to provide clear, anonymous, and consistent feedback aligned with institutional criteria.</p>
                 </article>
                 <article class="feature-card">
                     <div class="feature-icon">2</div>
-                    <h3>Automated Routing &amp; Approvals</h3>
-                    <p>Configurable workflows notify stakeholders, capture digital signatures, and maintain auditable trails.</p>
+                    <h3>Feedback Insight</h3>
+                    <p>Machine learning analyzes student responses to identify recurring themes and generates concise summaries that highlight key strengths and areas for improvement.</p>
                 </article>
                 <article class="feature-card">
                     <div class="feature-icon">3</div>
-                    <h3>Support Service Matching</h3>
-                    <p>Recommends scholarships, allowances, and mentorship based on student profiles and program availability.</p>
+                    <h3>Teaching Improvement</h3>
+                    <p>The system translates summarized feedback into practical teaching recommendations, supporting continuous faculty development and informed administrative decisions.</p>
                 </article>
                 <article class="feature-card">
                     <div class="feature-icon">4</div>
-                    <h3>Engagement &amp; Timesheet Tracking</h3>
-                    <p>Log duties, hours rendered, and supervisor feedback through intuitive dashboards and reminders.</p>
+                    <h3>Secure Access</h3>
+                    <p>Controlled access ensures that students, faculty members, and administrators interact with the system according to defined institutional roles.</p>
                 </article>
             </div>
         </section>
 
-        <section id="workflow" class="page-wrapper">
+        <section id="vision-mission" class="page-wrapper vision-mission">
             <div class="section-heading">
-                <h2>Streamlined Workflow</h2>
-                <p>Every stakeholder stays informed with guided steps, notifications, and real-time status visibility.</p>
-            </div>
-            <div class="process-grid">
-                <article class="process-step">
-                    <span>01</span>
-                    <h3>Application Launch</h3>
-                    <p>Students create profiles, submit requirements, and choose desired placements or support services.</p>
+            <div class="vision-mission__grid">
+                <article class="pillar-card pillar-card--vision">
+                    <span class="pillar-card__label">Vision</span>
+                    <h3>Cultivate insight-driven teaching excellence.</h3>
+                    <p>We envision educational institutions where faculty evaluations become powerful catalysts for growth. A future where every faculty member receives timely, actionable insights that inspire development, while administrators gain comprehensive data to support teaching excellence and elevate institutional academic quality.</p>
                 </article>
-                <article class="process-step">
-                    <span>02</span>
-                    <h3>Validation &amp; Assessment</h3>
-                    <p>Coordinators verify eligibility, schedule interviews, and evaluate qualifications via built-in rubrics.</p>
-                </article>
-                <article class="process-step">
-                    <span>03</span>
-                    <h3>Placement &amp; Onboarding</h3>
-                    <p>Approved students receive assignment notifications, digital contracts, and onboarding checklists.</p>
-                </article>
-                <article class="process-step">
-                    <span>04</span>
-                    <h3>Support Delivery</h3>
-                    <p>Support offices log assistance rendered, monitor compliance, and handle escalations collaboratively.</p>
-                </article>
-                <article class="process-step">
-                    <span>05</span>
-                    <h3>Insights &amp; Reporting</h3>
-                    <p>Dashboards present KPIs on placements, workloads, fulfillment, and student satisfaction trends.</p>
+                <article class="pillar-card pillar-card--mission">
+                    <span class="pillar-card__label">Mission</span>
+                    <h3>Turn evaluation into actionable growth.</h3>
+                    <p>Our mission is to transform faculty evaluation by centralizing feedback, sentiment, and performance data into one secure platform. We deliver real-time insights and collaborative coaching pathways that turn raw data into clear action steps. By championing transparency, responsiveness, and continuous improvement across every academic unit, we help institutions move beyond measurement to meaningful development.</p>
                 </article>
             </div>
         </section>
 
-        <section id="modules" class="page-wrapper">
-            <div class="section-heading">
-                <h2>Core Modules</h2>
-                <p>Modular architecture ensures each campus unit can adopt what they need while sharing a common data foundation.</p>
-            </div>
-            <div class="matrix">
-                <article class="matrix-card">
-                    <h3>Student Portal</h3>
-                    <ul>
-                        <li>Dynamic profile &amp; requirement checklist</li>
-                        <li>Application tracking with milestone alerts</li>
-                        <li>Timesheet logging and supervisor feedback</li>
-                    </ul>
-                </article>
-                <article class="matrix-card">
-                    <h3>Coordinator Console</h3>
-                    <ul>
-                        <li>Automated applicant scoring &amp; routing</li>
-                        <li>Placement management and role assignment</li>
-                        <li>Incident reporting and escalation tools</li>
-                    </ul>
-                </article>
-                <article class="matrix-card">
-                    <h3>Support Services Hub</h3>
-                    <ul>
-                        <li>Unified case management across offices</li>
-                        <li>Knowledge base and resource library</li>
-                        <li>Impact measurement and service SLAs</li>
-                    </ul>
-                </article>
-                <article class="matrix-card">
-                    <h3>Executive Insights</h3>
-                    <ul>
-                        <li>Real-time dashboards and exportable reports</li>
-                        <li>Budget allocation and utilization overview</li>
-                        <li>Program health and retention analytics</li>
-                    </ul>
-                </article>
-            </div>
-        </section>
-    </main>
+        
 
     <div class="modal" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title" aria-hidden="true">
         <div class="modal__dialog" role="document">
