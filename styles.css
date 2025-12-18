@@ -418,9 +418,9 @@ section {
 }
 
 .feature-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
     background: var(--primary-100);
     color: var(--primary-600);
     display: grid;
@@ -428,6 +428,11 @@ section {
     margin-bottom: 18px;
     font-weight: 600;
     transition: all 0.3s ease;
+}
+
+.feature-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 .process-grid {

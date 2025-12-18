@@ -47,7 +47,6 @@
                 </p>
                 <div class="button-group">
                     <a class="primary-btn" href="registration.php">Get Started</a>
-                    <a class="secondary-btn" href="#workflow">See How It Works</a>
                 </div>
             </div>
             <aside class="hero-card institutional-card" aria-label="Institutional representation statement">
@@ -77,19 +76,19 @@
                     <div class="problem-indicator__grid" role="list">
                         <article class="problem-card" role="listitem">
                             <span class="problem-card__badge">01</span>
-                            <p>Manual Processing.</p>
+                            <p>Manual Processing</p>
                         </article>
                         <article class="problem-card" role="listitem">
                             <span class="problem-card__badge">02</span>
-                            <p>Delayed Feedback.</p>
+                            <p>Delayed Feedback</p>
                         </article>
                         <article class="problem-card" role="listitem">
                             <span class="problem-card__badge">03</span>
-                            <p>Scattered Data.</p>
+                            <p>Scattered Data</p>
                         </article>
                         <article class="problem-card" role="listitem">
                             <span class="problem-card__badge">04</span>
-                            <p>Limited Insight.</p>
+                            <p>Limited Insight</p>
                         </article>
                     </div>
                 </div>
@@ -103,22 +102,44 @@
             </div>
             <div class="features-grid">
                 <article class="feature-card">
-                    <div class="feature-icon">1</div>
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 2H8a2 2 0 0 0-2 2v16l6-3 6 3V4a2 2 0 0 0-2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 9h6M9 13h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <h3>Faculty Evaluation</h3>
                     <p>A standardized, web-based evaluation process that allows students to provide clear, anonymous, and consistent feedback aligned with institutional criteria.</p>
                 </article>
                 <article class="feature-card">
-                    <div class="feature-icon">2</div>
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 11a8 8 0 1 1-8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 11a8 8 0 0 1-8 8 7.94 7.94 0 0 1-3.54-.83L3 21l2.83-5.65A8 8 0 0 1 13 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8h.01M16 11h.01M8 11h.01M12 14h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <h3>Feedback Insight</h3>
                     <p>Machine learning analyzes student responses to identify recurring themes and generates concise summaries that highlight key strengths and areas for improvement.</p>
                 </article>
                 <article class="feature-card">
-                    <div class="feature-icon">3</div>
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3a7 7 0 0 0-4 12.75V18a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.25A7 7 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 21h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 7v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <h3>Teaching Improvement</h3>
                     <p>The system translates summarized feedback into practical teaching recommendations, supporting continuous faculty development and informed administrative decisions.</p>
                 </article>
                 <article class="feature-card">
-                    <div class="feature-icon">4</div>
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2 3 6v6c0 5.25 3.5 10.25 9 11 5.5-.75 9-5.75 9-11V6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10.5 11.5 12 13l3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <h3>Secure Access</h3>
                     <p>Controlled access ensures that students, faculty members, and administrators interact with the system according to defined institutional roles.</p>
                 </article>

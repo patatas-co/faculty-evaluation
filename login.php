@@ -246,6 +246,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: grid;
             gap: 20px;
             color: var(--neutral-900);
+            position: relative;
+            isolation: isolate;
+        }
+
+        .auth-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('favicon/android-chrome-192x192.png') center/350px no-repeat;
+            opacity: 0.08;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .auth-hero > * {
+            position: relative;
+            z-index: 1;
         }
 
         .auth-hero h1 {
@@ -334,6 +351,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: grid;
             gap: 10px;
         }
+
+        .form-field--password .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-field--password input[type="password"],
+        .form-field--password input[type="text"] {
+            padding-right: 3rem;
+        }
+
+        .password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--primary-600);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.password-toggle:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+.password-toggle svg {
+    display: block;
+}
 
         .form-field label {
             font-weight: 600;
@@ -736,11 +795,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <section class="auth-hero" aria-labelledby="login-heading">
                 <p class="eyebrow">Secure Faculty Evaluation Access</p>
                 <h1 id="login-heading">Faculty Evaluation<span> Login</span></h1>
-                <p class="muted-text">Access evaluation schedules, submit feedback, and monitor faculty performance insights through your secure dashboard.</p>
+                <p class="muted-text">Access your secure dashboard to manage evaluation cycles, review performance data, and gain actionable insights that support continuous faculty development.</p>
                 <ul class="auth-checklist">
-                    <li>Streamlined evaluation workflows for every class</li>
-                    <li>Anonymous feedback preserved at every step</li>
-                    <li>Real-time updates guided by institutional policy</li>
+                    <li>Manage evaluations from one centralized dashboard</li>
+                    <li>Submit anonymous feedback with complete confidence</li>
+                    <li>Access real-time insights and performance reports</li>
                 </ul>
             </section>
 
@@ -764,12 +823,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form class="auth-form" action="<?= htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES) ?>" method="post" novalidate>
                     <div class="form-field">
                         <label for="email">Institutional Email</label>
-                        <input id="email" name="email" type="email" placeholder="name@dihs.edu.ph" value="<?= htmlspecialchars($formData['email'] ?? '', ENT_QUOTES) ?>" required />
+                        <input id="email" name="email" type="email" placeholder="Enter your email" value="<?= htmlspecialchars($formData['email'] ?? '', ENT_QUOTES) ?>" required />
                     </div>
 
-                    <div class="form-field">
+                    <div class="form-field form-field--password">
                         <label for="password">Password</label>
-                        <input id="password" name="password" type="password" placeholder="Enter your password" required />
+                        <div class="password-input-wrapper">
+                            <input id="password" name="password" type="password" placeholder="Enter your password" required />
+                            <button type="button" class="password-toggle" data-password-toggle="password" aria-pressed="false"></button>
+                        </div>
                     </div>
 
                     <button type="submit" class="primary-btn">Log In</button>

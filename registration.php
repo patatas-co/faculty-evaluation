@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = strtolower(trim((string)($_POST['email'] ?? '')));
     $password = (string)($_POST['password'] ?? '');
     $confirmPassword = (string)($_POST['confirmPassword'] ?? '');
-    $studentNumber = strtoupper(trim((string)($_POST['studentNumber'] ?? '')));
+    $studentNumber = trim((string)($_POST['studentNumber'] ?? ''));
     $classSectionId = isset($_POST['classSection']) ? (int)$_POST['classSection'] : 0;
 
     $formData = [
@@ -235,8 +235,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Passwords do not match.';
     }
 
-    if ($studentNumber === '' || !preg_match('/^[0-9]{4}-[0-9]-[0-9]{4}$/', $studentNumber)) {
-        $errors[] = 'Student number must follow the format YYYY-#-####.';
+    if ($studentNumber === '') {
+        $errors[] = 'Student number is required.';
     }
 
     if ($classSectionId <= 0 || !isset($classSectionLookup[$classSectionId])) {
@@ -496,6 +496,23 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
             display: grid;
             gap: 20px;
             color: var(--neutral-900);
+            position: relative;
+            isolation: isolate;
+        }
+
+        .auth-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('favicon/android-chrome-192x192.png') center/350px no-repeat;
+            opacity: 0.08;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .auth-hero > * {
+            position: relative;
+            z-index: 1;
         }
 
         .auth-hero h1 {
@@ -584,6 +601,48 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
             display: grid;
             gap: 10px;
         }
+
+        .form-field--password .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-field--password input[type="password"],
+        .form-field--password input[type="text"] {
+            padding-right: 3rem;
+        }
+
+        .password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--primary-600);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.password-toggle:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+.password-toggle svg {
+    display: block;
+}
 
         .form-field label {
             font-weight: 600;
@@ -1023,14 +1082,20 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
                     </div>
 
                     <div class="auth-select-inline">
-                        <div class="form-field">
+                        <div class="form-field form-field--password">
                             <label for="password">Password</label>
-                            <input id="password" name="password" type="password" placeholder="Create a password" required />
+                            <div class="password-input-wrapper">
+                                <input id="password" name="password" type="password" placeholder="Create a password" required />
+                                <button type="button" class="password-toggle" data-password-toggle="password" aria-pressed="false"></button>
+                            </div>
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field form-field--password">
                             <label for="confirmPassword">Confirm Password</label>
-                            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm your password" required />
+                            <div class="password-input-wrapper">
+                                <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm your password" required />
+                                <button type="button" class="password-toggle" data-password-toggle="confirmPassword" aria-pressed="false"></button>
+                            </div>
                         </div>
                     </div>
 
