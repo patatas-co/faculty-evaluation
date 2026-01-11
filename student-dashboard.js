@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `Year ${studentProfile.yearLevel}`
             : formatProfileValue('');
         const classSectionDisplay = studentProfile.classSection?.code
-            ? `${studentProfile.classSection.code}${studentProfile.classSection.yearLevel ? ` • Year ${studentProfile.classSection.yearLevel}` : ''}`
+            ? `${studentProfile.classSection.code}`
             : formatProfileValue('');
 
         content.innerHTML = `
@@ -143,10 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="profile-label">Student Number</span>
                             <span class="profile-value" aria-live="polite">${studentNumberDisplay}</span>
                         </div>
+                        ${studentProfile.yearLevel && studentProfile.yearLevel >= 7 && studentProfile.yearLevel <= 10 ? '' : `
                         <div class="profile-stat">
                             <span class="profile-label">Course Number</span>
                             <span class="profile-value" aria-live="polite">${courseNumberDisplay}</span>
                         </div>
+                        `}
                     </div>
                 </article>
 
@@ -157,10 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="profile-label">Email</span>
                             <span class="profile-value">${emailDisplay}</span>
                         </div>
+                        ${studentProfile.yearLevel && studentProfile.yearLevel >= 7 && studentProfile.yearLevel <= 10 ? '' : `
                         <div class="profile-info-item">
                             <span class="profile-label">Program</span>
                             <span class="profile-value">${courseProgramDisplay}</span>
                         </div>
+                        `}
                         <div class="profile-info-item">
                             <span class="profile-label">Year Level</span>
                             <span class="profile-value">${yearLevelDisplay}</span>

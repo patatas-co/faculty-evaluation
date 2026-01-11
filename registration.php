@@ -211,12 +211,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmPassword = (string)($_POST['confirmPassword'] ?? '');
     $studentNumber = trim((string)($_POST['studentNumber'] ?? ''));
     $classSectionId = isset($_POST['classSection']) ? (int)$_POST['classSection'] : 0;
+    $studentProgram = trim((string)($_POST['studentProgram'] ?? ''));
 
     $formData = [
         'fullName' => $fullName,
         'email' => $email,
         'studentNumber' => $studentNumber,
         'classSection' => (string)$classSectionId,
+        'studentProgram' => $studentProgram,
     ];
 
     if ($fullName === '' || mb_strlen($fullName) < 3) {
@@ -241,6 +243,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($classSectionId <= 0 || !isset($classSectionLookup[$classSectionId])) {
         $errors[] = 'Please select a valid class section.';
+    }
+
+    // Validate program field for Grade 11 and 12
+    if ($classSectionId > 0 && isset($classSectionLookup[$classSectionId])) {
+        $sectionData = $classSectionLookup[$classSectionId];
+        if (in_array($sectionData['year_level'], [11, 12])) {
+            if (empty($studentProgram) || !in_array($studentProgram, ['STEM', 'HUMMS', 'TVL', 'ABM'])) {
+                $errors[] = 'Please select a valid program for Grade 11 or 12.';
+            }
+        }
     }
 
     if (!$errors) {
@@ -270,12 +282,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userId = (int)$pdo->lastInsertId();
 
                 $sectionMeta = $classSectionLookup[$classSectionId];
+                // Use selected program for Grade 11 and 12, otherwise use section program
+                $courseProgram = in_array($sectionMeta['year_level'], [11, 12]) ? $studentProgram : $sectionMeta['program'];
+                
                 $insertStudentStmt = $pdo->prepare('INSERT INTO student_profiles (user_id, student_number, class_section_id, course_program, year_level) VALUES (?, ?, ?, ?, ?)');
                 $insertStudentStmt->execute([
                     $userId,
                     $studentNumber,
                     $classSectionId,
-                    $sectionMeta['program'],
+                    $courseProgram,
                     $sectionMeta['year_level'],
                 ]);
 
@@ -1118,6 +1133,17 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
                             </select>
                         </div>
 
+                        <div class="form-field" id="programField" style="display: none;">
+                            <label for="studentProgram">Program</label>
+                            <select id="studentProgram" name="studentProgram">
+                                <option value="">Select program...</option>
+                                <option value="STEM" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'STEM') ? 'selected' : '' ?>>STEM</option>
+                                <option value="HUMMS" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'HUMMS') ? 'selected' : '' ?>>HUMMS</option>
+                                <option value="TVL" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'TVL') ? 'selected' : '' ?>>TVL</option>
+                                <option value="ABM" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'ABM') ? 'selected' : '' ?>>ABM</option>
+                            </select>
+                        </div>
+
                         <div class="form-field">
                             <label for="classSection">Class Section</label>
                             <?php $selectedClassSection = (string)($formData['classSection'] ?? ''); ?>
@@ -1136,7 +1162,7 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
                                                 data-code="<?= htmlspecialchars($option['code'], ENT_QUOTES) ?>"
                                                 data-program="<?= htmlspecialchars($option['program'], ENT_QUOTES) ?>"
                                             <?= $selectedClassSection === (string)$option['id'] ? 'selected' : '' ?>
-                                        >
+                                            >
                                                 <?= htmlspecialchars($option['label'], ENT_QUOTES) ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -1168,6 +1194,35 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
     </footer>
 
     <script src="app.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gradeFilter = document.getElementById('classSectionGradeFilter');
+            const programField = document.getElementById('programField');
+            
+            if (gradeFilter && programField) {
+                function toggleProgramField() {
+                    const selectedGrade = gradeFilter.value.toLowerCase();
+                    if (selectedGrade === 'grade 11' || selectedGrade === 'grade 12') {
+                        programField.style.display = 'block';
+                    } else {
+                        programField.style.display = 'none';
+                        // Clear program selection when hiding
+                        const programSelect = document.getElementById('studentProgram');
+                        if (programSelect) {
+                            programSelect.value = '';
+                        }
+                    }
+                }
+                
+                // Initial check
+                toggleProgramField();
+                
+                // Listen for changes
+                gradeFilter.addEventListener('change', toggleProgramField);
+            }
+        });
+    </script>
 
     <div class="modal" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title" aria-hidden="true">
         <div class="modal__dialog" role="document">
