@@ -1116,7 +1116,7 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
 
                     <div class="form-field">
                         <label for="studentNumber">Student Number</label>
-                        <input id="studentNumber" name="studentNumber" type="text" placeholder="2025-1-2345" value="<?= htmlspecialchars($formData['studentNumber'] ?? '', ENT_QUOTES) ?>" required />
+                        <input id="studentNumber" name="studentNumber" type="text" placeholder="Check your ID for your student number" value="<?= htmlspecialchars($formData['studentNumber'] ?? '', ENT_QUOTES) ?>" required />
                     </div>
 
                     <div class="auth-select-inline">
