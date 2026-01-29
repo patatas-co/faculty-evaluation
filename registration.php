@@ -247,13 +247,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate program field for Grade 11 and 12
     if ($classSectionId > 0 && isset($classSectionLookup[$classSectionId])) {
-        $sectionData = $classSectionLookup[$classSectionId];
-        if (in_array($sectionData['year_level'], [11, 12])) {
-            if (empty($studentProgram) || !in_array($studentProgram, ['STEM', 'HUMMS', 'TVL', 'ABM'])) {
-                $errors[] = 'Please select a valid program for Grade 11 or 12.';
-            }
+    $sectionData = $classSectionLookup[$classSectionId];
+    
+    // Grade 11-12: STEM, HUMMS, TVL, ABM
+    if (in_array($sectionData['year_level'], [11, 12])) {
+        if (empty($studentProgram) || !in_array($studentProgram, ['STEM', 'HUMMS', 'TVL', 'ABM'])) {
+            $errors[] = 'Please select a valid program for Grade 11 or 12.';
         }
     }
+    
+    // Grade 9-10: Cookery or ICT
+    if (in_array($sectionData['year_level'], [9, 10])) {
+        if (empty($studentProgram) || !in_array($studentProgram, ['Cookery', 'ICT'])) {
+            $errors[] = 'Please select a valid program for Grade 9 or 10 (Cookery or ICT).';
+        }
+    }
+}
 
     if (!$errors) {
         try {
@@ -282,17 +291,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userId = (int)$pdo->lastInsertId();
 
                 $sectionMeta = $classSectionLookup[$classSectionId];
-                // Use selected program for Grade 11 and 12, otherwise use section program
-                $courseProgram = in_array($sectionMeta['year_level'], [11, 12]) ? $studentProgram : $sectionMeta['program'];
-                
-                $insertStudentStmt = $pdo->prepare('INSERT INTO student_profiles (user_id, student_number, class_section_id, course_program, year_level) VALUES (?, ?, ?, ?, ?)');
-                $insertStudentStmt->execute([
-                    $userId,
-                    $studentNumber,
-                    $classSectionId,
-                    $courseProgram,
-                    $sectionMeta['year_level'],
-                ]);
+
+// Use selected program for Grade 9-12, otherwise use section program
+$courseProgram = in_array($sectionMeta['year_level'], [9, 10, 11, 12]) 
+    ? $studentProgram 
+    : $sectionMeta['program'];
+
+$insertStudentStmt = $pdo->prepare('INSERT INTO student_profiles (user_id, student_number, class_section_id, course_program, year_level) VALUES (?, ?, ?, ?, ?)');
+$insertStudentStmt->execute([
+    $userId,
+    $studentNumber,
+    $classSectionId,
+    $courseProgram,
+    $sectionMeta['year_level'],
+]);
 
                 $insertSettingsStmt = $pdo->prepare('INSERT INTO user_settings (user_id) VALUES (?)');
                 $insertSettingsStmt->execute([$userId]);
@@ -1134,15 +1146,23 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
                         </div>
 
                         <div class="form-field" id="programField" style="display: none;">
-                            <label for="studentProgram">Program</label>
-                            <select id="studentProgram" name="studentProgram">
-                                <option value="">Select program...</option>
-                                <option value="STEM" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'STEM') ? 'selected' : '' ?>>STEM</option>
-                                <option value="HUMMS" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'HUMMS') ? 'selected' : '' ?>>HUMMS</option>
-                                <option value="TVL" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'TVL') ? 'selected' : '' ?>>TVL</option>
-                                <option value="ABM" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'ABM') ? 'selected' : '' ?>>ABM</option>
-                            </select>
-                        </div>
+    <label for="studentProgram">Program</label>
+    <select id="studentProgram" name="studentProgram">
+        <option value="">Select program...</option>
+        <!-- Grade 9-10 Programs (TVL Tracks) -->
+        <optgroup label="Grade 9-10 Programs" id="programGroup910">
+            <option value="Cookery" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'Cookery') ? 'selected' : '' ?>>Cookery</option>
+            <option value="ICT" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'ICT') ? 'selected' : '' ?>>Information and Communications Technology (ICT)</option>
+        </optgroup>
+        <!-- Grade 11-12 Programs (Senior High Strands) -->
+        <optgroup label="Grade 11-12 Programs" id="programGroup1112">
+            <option value="STEM" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'STEM') ? 'selected' : '' ?>>STEM</option>
+            <option value="HUMMS" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'HUMMS') ? 'selected' : '' ?>>HUMMS</option>
+            <option value="TVL" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'TVL') ? 'selected' : '' ?>>TVL</option>
+            <option value="ABM" <?= (isset($formData['studentProgram']) && $formData['studentProgram'] === 'ABM') ? 'selected' : '' ?>>ABM</option>
+        </optgroup>
+    </select>
+</div>
 
                         <div class="form-field">
                             <label for="classSection">Class Section</label>
@@ -1196,33 +1216,42 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
     <script src="app.js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const gradeFilter = document.getElementById('classSectionGradeFilter');
-            const programField = document.getElementById('programField');
-            
-            if (gradeFilter && programField) {
-                function toggleProgramField() {
-                    const selectedGrade = gradeFilter.value.toLowerCase();
-                    if (selectedGrade === 'grade 11' || selectedGrade === 'grade 12') {
-                        programField.style.display = 'block';
-                    } else {
-                        programField.style.display = 'none';
-                        // Clear program selection when hiding
-                        const programSelect = document.getElementById('studentProgram');
-                        if (programSelect) {
-                            programSelect.value = '';
-                        }
+    document.addEventListener('DOMContentLoaded', function() {
+        const gradeFilter = document.getElementById('classSectionGradeFilter');
+        const programField = document.getElementById('programField');
+        const programGroup910 = document.getElementById('programGroup910');
+        const programGroup1112 = document.getElementById('programGroup1112');
+        
+        if (gradeFilter && programField) {
+            function toggleProgramField() {
+                const selectedGrade = gradeFilter.value.toLowerCase();
+                const programSelect = document.getElementById('studentProgram');
+                
+                // Show/hide program field based on grade
+                if (selectedGrade === 'grade 9' || selectedGrade === 'grade 10') {
+                    programField.style.display = 'block';
+                    if (programGroup910) programGroup910.style.display = 'block';
+                    if (programGroup1112) programGroup1112.style.display = 'none';
+                } else if (selectedGrade === 'grade 11' || selectedGrade === 'grade 12') {
+                    programField.style.display = 'block';
+                    if (programGroup910) programGroup910.style.display = 'none';
+                    if (programGroup1112) programGroup1112.style.display = 'block';
+                } else {
+                    programField.style.display = 'none';
+                    if (programSelect) {
+                        programSelect.value = '';
                     }
                 }
-                
-                // Initial check
-                toggleProgramField();
-                
-                // Listen for changes
-                gradeFilter.addEventListener('change', toggleProgramField);
             }
-        });
-    </script>
+            
+            // Initial check
+            toggleProgramField();
+            
+            // Listen for changes
+            gradeFilter.addEventListener('change', toggleProgramField);
+        }
+    });
+</script>
 
     <div class="modal" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title" aria-hidden="true">
         <div class="modal__dialog" role="document">
