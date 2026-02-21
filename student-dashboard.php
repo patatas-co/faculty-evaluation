@@ -170,8 +170,14 @@ if ($currentUser) {
                 $params = array_merge([$classSectionId], array_map('intval', array_keys($courseIds)));
                 $restrictedStmt->execute($params);
 
+                $seenRestrictedFaculty = []; // ADD THIS
+
                 while ($row = $restrictedStmt->fetch(PDO::FETCH_ASSOC)) {
                     $courseId = (int)$row['course_id'];
+                    $facultyUserId = (int)$row['faculty_user_id'];          // ADD THIS
+                    $dedupKey = $courseId . '_' . $facultyUserId;           // ADD THIS
+                    if (isset($seenRestrictedFaculty[$dedupKey])) continue; // ADD THIS
+                    $seenRestrictedFaculty[$dedupKey] = true;               // ADD THIS
                     if (!isset($courseMap[$courseId])) {
                         $courseMap[$courseId] = [
                             'id' => $courseId,
@@ -181,6 +187,7 @@ if ($currentUser) {
                             'professors' => [],
                         ];
                     }
+                    
 
                     $courseMap[$courseId]['professors'][] = [
                         'id' => (int)$row['assignment_id'],
