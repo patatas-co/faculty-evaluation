@@ -49,7 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $updateStmt = $pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?');
             $updateStmt->execute([$user['id']]);
 
-            redirect('student-dashboard.php');
+            if ($user['role'] === 'admin') {
+    redirect('admin-dashboard.php');
+} elseif ($user['role'] === 'faculty') {
+    redirect('faculty-dashboard.php');
+} else {
+    redirect('student-dashboard.php');
+}
         }
     }
 }

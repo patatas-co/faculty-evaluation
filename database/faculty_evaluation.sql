@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 29, 2026 at 01:55 AM
+-- Generation Time: Feb 22, 2026 at 03:04 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -308,6 +308,27 @@ INSERT INTO `departments` (`id`, `name`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `evaluations`
+--
+
+CREATE TABLE `evaluations` (
+  `id` int(11) NOT NULL,
+  `faculty_assignment_id` int(11) NOT NULL,
+  `student_user_id` int(11) DEFAULT NULL,
+  `rating_clarity` tinyint(1) NOT NULL CHECK (`rating_clarity` between 1 and 5),
+  `rating_feedback` tinyint(1) NOT NULL CHECK (`rating_feedback` between 1 and 5),
+  `rating_engagement` tinyint(1) NOT NULL CHECK (`rating_engagement` between 1 and 5),
+  `rating_support` tinyint(1) NOT NULL CHECK (`rating_support` between 1 and 5),
+  `strengths` text DEFAULT NULL,
+  `opportunities` text DEFAULT NULL,
+  `is_anonymous` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `faculty_assignments`
 --
 
@@ -323,166 +344,7 @@ CREATE TABLE `faculty_assignments` (
 --
 
 INSERT INTO `faculty_assignments` (`id`, `faculty_user_id`, `course_offering_id`, `created_at`) VALUES
-(23, 1, 23, '2026-01-19 15:44:18'),
-(24, 1, 24, '2026-01-19 15:44:18'),
-(25, 1, 25, '2026-01-19 15:44:18'),
-(26, 1, 26, '2026-01-19 15:44:18'),
-(27, 1, 27, '2026-01-19 15:44:18'),
-(28, 1, 28, '2026-01-19 15:44:18'),
-(29, 1, 29, '2026-01-19 15:44:18'),
-(30, 1, 30, '2026-01-19 15:44:18'),
-(31, 1, 31, '2026-01-20 02:45:03'),
-(32, 1, 32, '2026-01-20 02:45:03'),
-(33, 1, 33, '2026-01-20 02:45:03'),
-(34, 1, 34, '2026-01-20 02:45:03'),
-(35, 1, 35, '2026-01-20 02:45:03'),
-(36, 1, 36, '2026-01-20 02:45:03'),
-(37, 1, 37, '2026-01-20 02:45:03'),
-(38, 1, 38, '2026-01-20 02:45:03'),
-(39, 1, 39, '2026-01-20 02:45:03'),
-(40, 1, 40, '2026-01-20 02:45:03'),
-(41, 1, 41, '2026-01-20 02:45:03'),
-(42, 1, 42, '2026-01-20 02:45:03'),
-(43, 1, 43, '2026-01-20 02:45:03'),
-(44, 1, 44, '2026-01-20 02:45:03'),
-(45, 1, 45, '2026-01-20 02:45:03'),
-(46, 1, 46, '2026-01-20 02:45:03'),
-(47, 1, 94, '2026-01-20 02:45:03'),
-(48, 1, 95, '2026-01-20 02:45:03'),
-(49, 1, 96, '2026-01-20 02:45:03'),
-(50, 1, 97, '2026-01-20 02:45:03'),
-(51, 1, 98, '2026-01-20 02:45:03'),
-(52, 1, 99, '2026-01-20 02:45:03'),
-(53, 1, 100, '2026-01-20 02:45:03'),
-(54, 1, 101, '2026-01-20 02:45:03'),
-(55, 1, 102, '2026-01-20 02:45:03'),
-(56, 1, 103, '2026-01-20 02:45:03'),
-(57, 1, 104, '2026-01-20 02:45:03'),
-(58, 1, 105, '2026-01-20 02:45:03'),
-(59, 1, 106, '2026-01-20 02:45:03'),
-(60, 1, 107, '2026-01-20 02:45:03'),
-(61, 1, 108, '2026-01-20 02:45:03'),
-(62, 1, 109, '2026-01-20 02:45:03'),
-(63, 1, 110, '2026-01-20 02:45:03'),
-(64, 1, 111, '2026-01-20 02:45:03'),
-(65, 1, 112, '2026-01-20 02:45:03'),
-(66, 1, 113, '2026-01-20 02:45:03'),
-(67, 1, 114, '2026-01-20 02:45:03'),
-(68, 1, 115, '2026-01-20 02:45:03'),
-(69, 1, 116, '2026-01-20 02:45:03'),
-(70, 1, 117, '2026-01-20 02:45:03'),
-(71, 1, 157, '2026-01-20 02:45:03'),
-(72, 1, 158, '2026-01-20 02:45:03'),
-(73, 1, 159, '2026-01-20 02:45:03'),
-(74, 1, 160, '2026-01-20 02:45:03'),
-(75, 1, 161, '2026-01-20 02:45:03'),
-(76, 1, 162, '2026-01-20 02:45:03'),
-(77, 1, 163, '2026-01-20 02:45:03'),
-(78, 1, 164, '2026-01-20 02:45:03'),
-(79, 1, 165, '2026-01-20 02:45:03'),
-(80, 1, 166, '2026-01-20 02:45:03'),
-(81, 1, 167, '2026-01-20 02:45:03'),
-(82, 1, 168, '2026-01-20 02:45:03'),
-(83, 1, 169, '2026-01-20 02:45:03'),
-(84, 1, 170, '2026-01-20 02:45:03'),
-(85, 1, 171, '2026-01-20 02:45:03'),
-(86, 1, 172, '2026-01-20 02:45:03'),
-(87, 1, 173, '2026-01-20 02:45:03'),
-(88, 1, 174, '2026-01-20 02:45:03'),
-(89, 1, 175, '2026-01-20 02:45:03'),
-(90, 1, 176, '2026-01-20 02:45:03'),
-(91, 1, 177, '2026-01-20 02:45:03'),
-(92, 1, 178, '2026-01-20 02:45:03'),
-(93, 1, 179, '2026-01-20 02:45:03'),
-(94, 1, 180, '2026-01-20 02:45:03'),
-(95, 1, 220, '2026-01-20 02:45:03'),
-(96, 1, 221, '2026-01-20 02:45:03'),
-(97, 1, 222, '2026-01-20 02:45:03'),
-(98, 1, 223, '2026-01-20 02:45:03'),
-(99, 1, 224, '2026-01-20 02:45:03'),
-(100, 1, 225, '2026-01-20 02:45:03'),
-(101, 1, 226, '2026-01-20 02:45:03'),
-(102, 1, 227, '2026-01-20 02:45:03'),
-(103, 1, 228, '2026-01-20 02:45:03'),
-(104, 1, 229, '2026-01-20 02:45:03'),
-(105, 1, 230, '2026-01-20 02:45:03'),
-(106, 1, 231, '2026-01-20 02:45:03'),
-(107, 1, 232, '2026-01-20 02:45:03'),
-(108, 1, 233, '2026-01-20 02:45:03'),
-(109, 1, 234, '2026-01-20 02:45:03'),
-(110, 1, 235, '2026-01-20 02:45:03'),
-(111, 1, 236, '2026-01-20 02:45:03'),
-(112, 1, 237, '2026-01-20 02:45:03'),
-(113, 1, 238, '2026-01-20 02:45:03'),
-(114, 1, 239, '2026-01-20 02:45:03'),
-(115, 1, 240, '2026-01-20 02:45:03'),
-(116, 1, 241, '2026-01-20 02:45:03'),
-(117, 1, 242, '2026-01-20 02:45:03'),
-(118, 1, 243, '2026-01-20 02:45:03'),
-(119, 1, 47, '2026-01-20 02:45:03'),
-(120, 1, 48, '2026-01-20 02:45:03'),
-(121, 1, 49, '2026-01-20 02:45:03'),
-(122, 1, 50, '2026-01-20 02:45:03'),
-(123, 1, 51, '2026-01-20 02:45:03'),
-(124, 1, 52, '2026-01-20 02:45:03'),
-(125, 1, 53, '2026-01-20 02:45:03'),
-(126, 1, 54, '2026-01-20 02:45:03'),
-(127, 1, 55, '2026-01-20 02:45:03'),
-(128, 1, 56, '2026-01-20 02:45:03'),
-(129, 1, 57, '2026-01-20 02:45:03'),
-(130, 1, 58, '2026-01-20 02:45:03'),
-(131, 1, 59, '2026-01-20 02:45:03'),
-(132, 1, 60, '2026-01-20 02:45:03'),
-(133, 1, 61, '2026-01-20 02:45:03'),
-(134, 1, 62, '2026-01-20 02:45:03'),
-(135, 1, 118, '2026-01-20 02:45:03'),
-(136, 1, 119, '2026-01-20 02:45:03'),
-(137, 1, 120, '2026-01-20 02:45:03'),
-(138, 1, 121, '2026-01-20 02:45:03'),
-(139, 1, 122, '2026-01-20 02:45:03'),
-(140, 1, 123, '2026-01-20 02:45:03'),
-(141, 1, 124, '2026-01-20 02:45:03'),
-(142, 1, 125, '2026-01-20 02:45:03'),
-(143, 1, 126, '2026-01-20 02:45:03'),
-(144, 1, 127, '2026-01-20 02:45:03'),
-(145, 1, 128, '2026-01-20 02:45:03'),
-(146, 1, 129, '2026-01-20 02:45:03'),
-(147, 1, 130, '2026-01-20 02:45:03'),
-(148, 1, 131, '2026-01-20 02:45:03'),
-(149, 1, 132, '2026-01-20 02:45:03'),
-(150, 1, 133, '2026-01-20 02:45:03'),
-(151, 1, 181, '2026-01-20 02:45:03'),
-(152, 1, 182, '2026-01-20 02:45:03'),
-(153, 1, 183, '2026-01-20 02:45:03'),
-(154, 1, 184, '2026-01-20 02:45:03'),
-(155, 1, 185, '2026-01-20 02:45:03'),
-(156, 1, 186, '2026-01-20 02:45:03'),
-(157, 1, 187, '2026-01-20 02:45:03'),
-(158, 1, 188, '2026-01-20 02:45:03'),
-(159, 1, 189, '2026-01-20 02:45:03'),
-(160, 1, 190, '2026-01-20 02:45:03'),
-(161, 1, 191, '2026-01-20 02:45:03'),
-(162, 1, 192, '2026-01-20 02:45:03'),
-(163, 1, 193, '2026-01-20 02:45:03'),
-(164, 1, 194, '2026-01-20 02:45:03'),
-(165, 1, 195, '2026-01-20 02:45:03'),
-(166, 1, 196, '2026-01-20 02:45:03'),
-(167, 1, 244, '2026-01-20 02:45:03'),
-(168, 1, 245, '2026-01-20 02:45:03'),
-(169, 1, 246, '2026-01-20 02:45:03'),
-(170, 1, 247, '2026-01-20 02:45:03'),
-(171, 1, 248, '2026-01-20 02:45:03'),
-(172, 1, 249, '2026-01-20 02:45:03'),
-(173, 1, 250, '2026-01-20 02:45:03'),
-(174, 1, 251, '2026-01-20 02:45:03'),
-(175, 1, 252, '2026-01-20 02:45:03'),
-(176, 1, 253, '2026-01-20 02:45:03'),
-(177, 1, 254, '2026-01-20 02:45:03'),
-(178, 1, 255, '2026-01-20 02:45:03'),
-(179, 1, 256, '2026-01-20 02:45:03'),
-(180, 1, 257, '2026-01-20 02:45:03'),
-(181, 1, 258, '2026-01-20 02:45:03'),
-(182, 1, 259, '2026-01-20 02:45:03');
+(191, 11, 193, '2026-02-22 01:58:47');
 
 -- --------------------------------------------------------
 
@@ -511,7 +373,7 @@ CREATE TABLE `faculty_profiles` (
 --
 
 INSERT INTO `faculty_profiles` (`id`, `user_id`, `department_id`, `employee_id`, `grade_levels`, `course_program_teaching_and_section`, `mobile_number`, `alternate_email`, `office_email`, `role`, `academic_rank`, `status`, `created_at`) VALUES
-(1, 1, 1, 'EMP-2024-001', 'Grade 11', 'GRADE11-A', '9919912366', 'daas@gmail.com', 'denisealia@dihs.edu.ph', 'Teacher', 'Instructor I', 'Active', '2026-01-19 11:51:48');
+(4, 11, 1, 'EMP-2024-00010', NULL, NULL, NULL, NULL, NULL, NULL, 'Instructor I', 'Active', '2026-02-22 01:58:47');
 
 -- --------------------------------------------------------
 
@@ -534,10 +396,8 @@ CREATE TABLE `student_profiles` (
 --
 
 INSERT INTO `student_profiles` (`id`, `user_id`, `student_number`, `year_level`, `class_section_id`, `course_program`, `created_at`) VALUES
-(1, 3, '2025-2-005022', 11, 13, 'STEM', '2026-01-19 11:52:37'),
-(2, 4, '2023-2-005044', 7, 1, 'Grade 7', '2026-01-19 15:09:50'),
-(3, 5, '2024-2-050403', 9, 8, 'Grade 9', '2026-01-19 16:23:09'),
-(4, 6, '2025-5-010203', 10, 10, 'Cookery', '2026-01-20 02:37:01');
+(5, 8, '2021-2-005033', 7, 19, 'Grade 7 - Abelardo', '2026-02-22 01:46:06'),
+(6, 12, '2023-2-005044', 9, 24, 'Cookery', '2026-02-22 01:59:46');
 
 -- --------------------------------------------------------
 
@@ -563,12 +423,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`, `status`, `email_verified`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 'Denise Alia', 'denisealia@dihs.edu.ph', '$2y$10$placeholder_hash_change_me', 'faculty', 'active', 1, NULL, '2026-01-19 11:51:48', '2026-01-19 11:51:48'),
-(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$placeholder_hash_change_me', 'admin', 'active', 1, NULL, '2026-01-19 11:51:48', '2026-01-19 11:51:48'),
-(3, 'Charles Patrick Arias', 'cpmarias@dihs.edu.ph', '$2y$10$/bwN9eWuqK5vrpSxYvizIekl6.T1a0ojClVre3pfrNbLTdTWrgknK', 'student', 'active', 0, '2026-01-20 10:47:28', '2026-01-19 11:52:37', '2026-01-20 02:47:28'),
-(4, 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '$2y$10$Wgfv4b2FlOGencu0v8zD.O/TceyacXSz7zPwZR6/u3cuOhgbph.xW', 'student', 'active', 0, '2026-01-20 09:57:33', '2026-01-19 15:09:50', '2026-01-20 01:57:33'),
-(5, 'Julia Chloe Fornal', 'jcfornal@dihs.edu.ph', '$2y$10$NTBFcJLi1W8XBzrM6SjNduTiVaISHI26cj5bu1UOscvlPYBEMUGRC', 'student', 'active', 0, '2026-01-20 00:23:13', '2026-01-19 16:23:09', '2026-01-19 16:23:13'),
-(6, 'Ryza Evangelio', 'rmevangelio@dihs.edu.ph', '$2y$10$a9JX83cSEBN/0ipUrI10TeMppWUPXHY1enUBxR1zdIuVWTOB4HdHa', 'student', 'active', 0, '2026-01-20 10:48:09', '2026-01-20 02:37:01', '2026-01-20 02:48:09');
+(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$fsy7g4i/UOXHwbXj99u4lO2cPevszGM9DohbXFHFz7Daque2Cc/XK', 'admin', 'active', 1, '2026-02-22 10:02:19', '2026-01-19 11:51:48', '2026-02-22 02:02:19'),
+(8, 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '$2y$10$rVrInAO1CPqr75ByYK43eu.ezjpxJBS0dZAsyj2J1mLsgNnAsx.Le', 'student', 'active', 0, '2026-02-22 09:47:55', '2026-02-22 01:46:06', '2026-02-22 01:47:55'),
+(11, 'Chloe Fornal', 'jcfornal@dihs.edu.com', '$2y$10$/VE3wwm/XKBOmbgcTY7My.VCEzP6qkVYYPAd5ZVcUyRSnQMRA.q02', 'faculty', 'active', 1, NULL, '2026-02-22 01:58:47', '2026-02-22 01:58:47'),
+(12, 'Charles Patrick Arias', 'cpmarias@dihs.edu.ph', '$2y$10$ETXBX5lUiSuQbwRow8TmIOC.nQsVlKZcaEWaKd7L/aE4Zyv3MuGga', 'student', 'active', 0, '2026-02-22 09:59:50', '2026-02-22 01:59:46', '2026-02-22 01:59:50');
 
 -- --------------------------------------------------------
 
@@ -593,10 +451,9 @@ CREATE TABLE `user_settings` (
 --
 
 INSERT INTO `user_settings` (`id`, `user_id`, `receive_email_reminders`, `notify_period_close`, `profile_visible_to_faculty`, `submit_anonymously`, `theme_preference`, `language_preference`, `created_at`) VALUES
-(1, 3, 1, 1, 1, 1, 'light', 'en', '2026-01-19 11:52:37'),
-(2, 4, 1, 1, 1, 1, 'light', 'en', '2026-01-19 15:09:50'),
-(3, 5, 1, 1, 1, 1, 'light', 'en', '2026-01-19 16:23:09'),
-(4, 6, 1, 1, 1, 1, 'light', 'en', '2026-01-20 02:37:01');
+(6, 8, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:46:06'),
+(8, 11, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:58:47'),
+(9, 12, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:59:46');
 
 --
 -- Indexes for dumped tables
@@ -629,6 +486,15 @@ ALTER TABLE `course_offerings`
 --
 ALTER TABLE `departments`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `evaluations`
+--
+ALTER TABLE `evaluations`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_eval` (`faculty_assignment_id`,`student_user_id`),
+  ADD KEY `fk_eval_assignment` (`faculty_assignment_id`),
+  ADD KEY `fk_eval_student` (`student_user_id`);
 
 --
 -- Indexes for table `faculty_assignments`
@@ -699,34 +565,40 @@ ALTER TABLE `departments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `evaluations`
+--
+ALTER TABLE `evaluations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `faculty_assignments`
 --
 ALTER TABLE `faculty_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=192;
 
 --
 -- AUTO_INCREMENT for table `faculty_profiles`
 --
 ALTER TABLE `faculty_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `student_profiles`
 --
 ALTER TABLE `student_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `user_settings`
 --
 ALTER TABLE `user_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
@@ -738,6 +610,13 @@ ALTER TABLE `user_settings`
 ALTER TABLE `course_offerings`
   ADD CONSTRAINT `course_offerings_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `course_offerings_ibfk_2` FOREIGN KEY (`class_section_id`) REFERENCES `class_sections` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `evaluations`
+--
+ALTER TABLE `evaluations`
+  ADD CONSTRAINT `fk_eval_assignment` FOREIGN KEY (`faculty_assignment_id`) REFERENCES `faculty_assignments` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_eval_student` FOREIGN KEY (`student_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `faculty_assignments`
