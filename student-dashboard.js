@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.add('collapsed');
     }
 
+    // Remove pre-collapsed helper now that .collapsed is properly set
+    document.documentElement.classList.remove('sidebar-pre-collapsed');
+
     // Toggle sidebar collapse/expand
     toggleBtn.addEventListener('click', () => {
         const isNowCollapsed = sidebar.classList.toggle('collapsed');

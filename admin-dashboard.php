@@ -475,7 +475,7 @@ if (!$encoded) $encoded = '{}';
             document.documentElement.classList.add('sidebar-pre-collapsed');
         }
     })();
-</script>
+    </script>
 </head>
 <body>
 <aside class="sidebar">

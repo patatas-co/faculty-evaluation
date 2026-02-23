@@ -16,17 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let urlMsg        = data.urlMsg      || '';
 
     // ── Sidebar persistence ──
-const SIDEBAR_KEY = 'adminSidebarCollapsed';
+    const SIDEBAR_KEY = 'adminSidebarCollapsed';
 
-if (localStorage.getItem(SIDEBAR_KEY) === 'true') {
-    sidebar.classList.add('collapsed');
-}
+    // Apply collapsed class immediately so CSS transitions and main-content
+    // margin are both correct from the start — not just the visual width
+    if (localStorage.getItem(SIDEBAR_KEY) === 'true') {
+        sidebar.classList.add('collapsed');
+    }
 
-toggleBtn.addEventListener('click', () => {
-    const isNowCollapsed = sidebar.classList.toggle('collapsed');
-    localStorage.setItem(SIDEBAR_KEY, String(isNowCollapsed));
-    updateTooltips();
-});
+    // Remove the pre-collapsed helper class now that .collapsed is set
+    document.documentElement.classList.remove('sidebar-pre-collapsed');
+
+    toggleBtn.addEventListener('click', () => {
+        const isNowCollapsed = sidebar.classList.toggle('collapsed');
+        localStorage.setItem(SIDEBAR_KEY, String(isNowCollapsed));
+        updateTooltips();
+    });
 
     if (logoutLink) {
         logoutLink.addEventListener('click', e => {

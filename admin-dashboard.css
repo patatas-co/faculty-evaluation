@@ -22,6 +22,19 @@
     padding: 24px 8px;
 }
 
+.sidebar-pre-collapsed .main-content {
+    margin-left: 70px;
+}
+
+.sidebar-pre-collapsed .nav-link span,
+.sidebar-pre-collapsed .logo span,
+.sidebar-pre-collapsed .logout-btn span,
+.sidebar-pre-collapsed .nav-chevron {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
 /* ── Stats Grid ── */
 .admin-stats-grid {
     display: grid;
