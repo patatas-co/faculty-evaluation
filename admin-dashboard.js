@@ -15,11 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeTab   = data.activeTab   || 'overview';
     let urlMsg        = data.urlMsg      || '';
 
-    // Sidebar
-    toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        updateTooltips();
-    });
+    // ── Sidebar persistence ──
+const SIDEBAR_KEY = 'adminSidebarCollapsed';
+
+if (localStorage.getItem(SIDEBAR_KEY) === 'true') {
+    sidebar.classList.add('collapsed');
+}
+
+toggleBtn.addEventListener('click', () => {
+    const isNowCollapsed = sidebar.classList.toggle('collapsed');
+    localStorage.setItem(SIDEBAR_KEY, String(isNowCollapsed));
+    updateTooltips();
+});
 
     if (logoutLink) {
         logoutLink.addEventListener('click', e => {
@@ -137,11 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function flashHTML() {
-        if (urlMsg === 'deleted')         return `<div class="flash-msg success flash-auto-dismiss">&#10003; Teacher deleted successfully.</div>`;
-        if (urlMsg === 'status_updated')  return `<div class="flash-msg success flash-auto-dismiss">&#10003; Teacher status updated.</div>`;
-        if (urlMsg === 'section_deleted') return `<div class="flash-msg success flash-auto-dismiss">&#10003; Section deleted successfully.</div>`;
-        if (flash.success)                return `<div class="flash-msg success flash-auto-dismiss">&#10003; ${flash.success}</div>`;
-        if (flash.error)                  return `<div class="flash-msg error flash-auto-dismiss">&#10007; ${flash.error}</div>`;
+    if (urlMsg === 'deleted')         return `<div class="flash-msg success flash-auto-dismiss">Teacher deleted successfully.</div>`;
+    if (urlMsg === 'status_updated')  return `<div class="flash-msg success flash-auto-dismiss">Teacher status updated.</div>`;
+    if (urlMsg === 'section_deleted') return `<div class="flash-msg success flash-auto-dismiss">Section deleted successfully.</div>`;
+    if (flash.success)                return `<div class="flash-msg success flash-auto-dismiss">${flash.success}</div>`;
+    if (flash.error)                  return `<div class="flash-msg error flash-auto-dismiss">${flash.error}</div>`;
         return '';
     }
 
@@ -159,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
             el.style.transition = 'opacity 0.3s ease';
             el.style.opacity = '0';
-            setTimeout(() => el.remove(), 300);
+            setTimeout(() => el.remove(), 800);
         });
     }
 
@@ -175,47 +182,47 @@ document.addEventListener('DOMContentLoaded', () => {
         ${flashHTML()}
         <div class="overview-grid">
             <div class="admin-stats-grid">
-                <div class="admin-stat-card" style="--accent:#4caf50">
-                    <div class="admin-stat-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                    </div>
-                    <div class="admin-stat-value">${stats.teachers ?? 0}</div>
-                    <div class="admin-stat-label">Total Teachers</div>
-                </div>
-                <div class="admin-stat-card" style="--accent:#3b82f6">
-                    <div class="admin-stat-icon" style="background:rgba(59,130,246,0.1)">
-                        <svg style="stroke:#3b82f6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                    </div>
-                    <div class="admin-stat-value">${stats.students ?? 0}</div>
-                    <div class="admin-stat-label">Total Students</div>
-                </div>
-                <div class="admin-stat-card" style="--accent:#f59e0b">
-                    <div class="admin-stat-icon" style="background:rgba(245,158,11,0.1)">
-                        <svg style="stroke:#f59e0b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                            <polyline points="9 22 9 12 15 12 15 22"/>
-                        </svg>
-                    </div>
-                    <div class="admin-stat-value">${stats.sections ?? 0}</div>
-                    <div class="admin-stat-label">Class Sections</div>
-                </div>
-                <div class="admin-stat-card" style="--accent:#8b5cf6">
-                    <div class="admin-stat-icon" style="background:rgba(139,92,246,0.1)">
-                        <svg style="stroke:#8b5cf6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </div>
-                    <div class="admin-stat-value">${stats.evals ?? 0}</div>
-                    <div class="admin-stat-label">Evaluations</div>
-                </div>
+                <div class="admin-stat-card" style="--accent:var(--color-primary)">
+    <div class="admin-stat-icon" style="background:var(--color-primary-light)">
+        <svg style="stroke:var(--color-primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+    </div>
+    <div class="admin-stat-value">${stats.teachers ?? 0}</div>
+    <div class="admin-stat-label">Total Teachers</div>
+</div>
+                <div class="admin-stat-card" style="--accent:var(--color-info)">
+    <div class="admin-stat-icon" style="background:var(--color-info-light)">
+        <svg style="stroke:var(--color-info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+    </div>
+    <div class="admin-stat-value">${stats.students ?? 0}</div>
+    <div class="admin-stat-label">Total Students</div>
+</div>
+                <div class="admin-stat-card" style="--accent:var(--color-warning)">
+    <div class="admin-stat-icon" style="background:var(--color-warning-light)">
+        <svg style="stroke:var(--color-warning)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+    </div>
+    <div class="admin-stat-value">${stats.sections ?? 0}</div>
+    <div class="admin-stat-label">Class Sections</div>
+</div>
+                <div class="admin-stat-card" style="--accent:var(--color-info)">
+    <div class="admin-stat-icon" style="background:var(--color-info-light)">
+        <svg style="stroke:var(--color-info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+    </div>
+    <div class="admin-stat-value">${stats.evals ?? 0}</div>
+    <div class="admin-stat-label">Evaluations</div>
+</div>
             </div>
             <div class="module-card">
                 <div class="admin-section-title">
@@ -281,25 +288,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function attachTeacherListeners(tbody) {
-        tbody.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const form   = btn.closest('.toggle-form');
-                const status = form.querySelector('[name="current_status"]').value;
-                const action = status === 'active' ? 'deactivate' : 'activate';
-                showConfirm(
-                    `${action.charAt(0).toUpperCase() + action.slice(1)} Teacher`,
-                    `Are you sure you want to ${action} this teacher?`,
-                    () => form.submit()
-                );
-            });
+    tbody.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const form   = btn.closest('.toggle-form');
+            const userId = form.querySelector('[name="user_id"]').value;
+            const status = form.querySelector('[name="current_status"]').value;
+            const action = status === 'active' ? 'deactivate' : 'activate';
+            showConfirm(
+                `${action.charAt(0).toUpperCase() + action.slice(1)} Teacher`,
+                `Are you sure you want to ${action} this teacher?`,
+                () => submitTeacherAction({ action: 'toggle_status', user_id: userId, current_status: status })
+            );
         });
-        tbody.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const form = btn.closest('.delete-form');
-                showConfirm('Delete Teacher', 'This will permanently delete the teacher and all their assignments. This cannot be undone.', () => form.submit());
-            });
+    });
+    tbody.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const form   = btn.closest('.delete-form');
+            const userId = form.querySelector('[name="user_id"]').value;
+            showConfirm(
+                'Delete Teacher',
+                'This will permanently delete the teacher and all their assignments. This cannot be undone.',
+                () => submitTeacherAction({ action: 'delete_teacher', user_id: userId })
+            );
         });
+    });
+}
+
+function submitTeacherAction(payload) {
+    payload._fetch = '1';
+    fetch('admin-dashboard.php', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new URLSearchParams(payload)
+    })
+    .then(res => { if (!res.ok) throw new Error('failed'); return fetch('admin-dashboard.php?json=teachers'); })
+    .then(res => res.json())
+    .catch(() => null)
+    .then(freshData => {
+    if (freshData && freshData.teachers) {
+        // Sync from server response
+        teachers.length = 0;
+        freshData.teachers.forEach(t => teachers.push(t));
+        Object.assign(stats, freshData.stats || {});
+    } else {
+        // Fallback: update local array immediately if server response unavailable
+        if (payload.action === 'delete_teacher') {
+            const idx = teachers.findIndex(t => String(t.id) === String(payload.user_id));
+            if (idx !== -1) teachers.splice(idx, 1);
+        }
+        if (payload.action === 'toggle_status') {
+            const teacher = teachers.find(t => String(t.id) === String(payload.user_id));
+            if (teacher) teacher.status = teacher.status === 'active' ? 'inactive' : 'active';
+        }
     }
+    flash = { success: payload.action === 'toggle_status' ? 'Teacher status updated.' : 'Teacher deleted successfully.' };
+    renderTeachers();
+    setTimeout(dismissFlash, 800);
+});
+}
 
     function renderTeachers(filterText = '') {
         const filtered = filterText

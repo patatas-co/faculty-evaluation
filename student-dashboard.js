@@ -8,9 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = document.getElementById('module-title');
     const logoutLink = document.querySelector('.logout-btn');
 
+    // ── Sidebar persistence (matches admin dashboard) ──
+    const SIDEBAR_KEY = 'studentSidebarCollapsed';
+
+    if (localStorage.getItem(SIDEBAR_KEY) === 'true') {
+        sidebar.classList.add('collapsed');
+    }
+
     // Toggle sidebar collapse/expand
     toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
+        const isNowCollapsed = sidebar.classList.toggle('collapsed');
+        localStorage.setItem(SIDEBAR_KEY, String(isNowCollapsed));
         updateTooltipState();
     });
 

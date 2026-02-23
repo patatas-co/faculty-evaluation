@@ -13,6 +13,30 @@ if (!$currentUser || $currentUser['role'] !== 'admin') {
     exit;
 }
 
+// JSON endpoint for fetch-based re-renders
+if (isset($_GET['json']) && $_GET['json'] === 'teachers') {
+    header('Content-Type: application/json');
+    $teachers = $pdo->query(
+        "SELECT u.id, u.full_name, u.email, u.status,
+                p.employee_id, p.department, p.academic_rank,
+                COUNT(fa.id) AS assignment_count
+         FROM users u
+         LEFT JOIN faculty_profiles p  ON p.user_id = u.id
+         LEFT JOIN faculty_assignments fa ON fa.faculty_user_id = u.id
+         WHERE u.role = 'faculty'
+         GROUP BY u.id ORDER BY u.full_name"
+    )->fetchAll(PDO::FETCH_ASSOC);
+    $statsRow = $pdo->query(
+        "SELECT
+            (SELECT COUNT(*) FROM users WHERE role='faculty') AS teachers,
+            (SELECT COUNT(*) FROM users WHERE role='student') AS students,
+            (SELECT COUNT(*) FROM class_sections)             AS sections,
+            (SELECT COUNT(*) FROM evaluations)                AS evals"
+    )->fetch(PDO::FETCH_ASSOC);
+    echo json_encode(['teachers' => $teachers, 'stats' => $statsRow]);
+    exit;
+}
+
 // ── Sections CSV Template Download ──
 if (isset($_GET['action']) && $_GET['action'] === 'download_sections_template') {
     header('Content-Type: text/csv');
@@ -155,16 +179,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $uid    = (int)($_POST['user_id'] ?? 0);
         $status = $_POST['current_status'] === 'active' ? 'inactive' : 'active';
         $pdo->prepare("UPDATE users SET status=? WHERE id=? AND role='faculty'")->execute([$status, $uid]);
-        header('Location: admin-dashboard.php?tab=teachers&msg=status_updated');
-        exit;
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || isset($_POST['_fetch'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => true]);
+    exit;
+}
+header('Location: admin-dashboard.php?tab=teachers&msg=status_updated');
+exit;
     }
 
     // Delete teacher
     if ($action === 'delete_teacher') {
         $uid = (int)($_POST['user_id'] ?? 0);
         $pdo->prepare("DELETE FROM users WHERE id=? AND role='faculty'")->execute([$uid]);
-        header('Location: admin-dashboard.php?tab=teachers&msg=deleted');
-        exit;
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || isset($_POST['_fetch'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => true]);
+    exit;
+}
+header('Location: admin-dashboard.php?tab=teachers&msg=deleted');
+exit;
     }
 
     // ── CSV Import ──
@@ -435,6 +469,13 @@ if (!$encoded) $encoded = '{}';
     <link rel="stylesheet" href="student-dashboard.css"/>
     <link rel="stylesheet" href="admin-dashboard.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <script>
+    (function() {
+        if (localStorage.getItem('adminSidebarCollapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-pre-collapsed');
+        }
+    })();
+</script>
 </head>
 <body>
 <aside class="sidebar">
