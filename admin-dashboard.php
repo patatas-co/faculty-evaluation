@@ -13,6 +13,20 @@ if (!$currentUser || $currentUser['role'] !== 'admin') {
     exit;
 }
 
+// ── Sections CSV Template Download ──
+if (isset($_GET['action']) && $_GET['action'] === 'download_sections_template') {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="sections_import_template.csv"');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    $out = fopen('php://output', 'w');
+    fputcsv($out, ['code', 'year_level', 'program', 'adviser_name']);
+    fputcsv($out, ['GRADE7-SANTOS', '7', 'Grade 7 - Santos', 'Ms. Maria Santos']);
+    fputcsv($out, ['GRADE8-LUNA',   '8', 'Grade 8 - Luna',   'Mr. Jose Luna']);
+    fputcsv($out, ['GRADE11-A',    '11', 'Grade 11',         '']);
+    fclose($out);
+    exit;
+}
+
 // ── CSV Template Download ──
 if (isset($_GET['action']) && $_GET['action'] === 'download_csv_template') {
     $courses_list  = $pdo->query("SELECT name FROM courses ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
@@ -59,7 +73,7 @@ $teachers = $teachersStmt->fetchAll(PDO::FETCH_ASSOC);
 // ── Departments & Courses & Sections for add form ──
 $departments = $pdo->query("SELECT id, name FROM departments ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $courses     = $pdo->query("SELECT id, name FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sections    = $pdo->query("SELECT id, code, year_level FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+$sections    = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
 
 // ── Handle POST actions ──
 $actionError   = '';
@@ -255,6 +269,141 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    // ── Import Sections CSV ──
+    if ($action === 'import_sections_csv') {
+        $file = $_FILES['sections_csv_file'] ?? null;
+        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+            $actionError = 'No file uploaded or upload error.';
+        } elseif (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) !== 'csv') {
+            $actionError = 'Please upload a valid .csv file.';
+        } else {
+            $handle = fopen($file['tmp_name'], 'r');
+            if (!$handle) {
+                $actionError = 'Could not read the uploaded file.';
+            } else {
+                $header = array_map('strtolower', array_map('trim', fgetcsv($handle)));
+                $requiredCols = ['code', 'year_level'];
+                $missingCols = array_diff($requiredCols, $header);
+
+                if ($missingCols) {
+                    $actionError = 'CSV missing required columns: ' . implode(', ', $missingCols);
+                    fclose($handle);
+                } else {
+                    $imported = 0; $updated = 0; $skipped = []; $rowNum = 1;
+
+                    // Build existing section map: code => id
+                    $existingMap = [];
+                    foreach ($pdo->query("SELECT id, code FROM class_sections")->fetchAll(PDO::FETCH_ASSOC) as $s) {
+                        $existingMap[strtolower(trim($s['code']))] = $s['id'];
+                    }
+
+                    $insertStmt = $pdo->prepare("INSERT INTO class_sections (code, program, year_level, adviser_name) VALUES (?,?,?,?)");
+                    $updateStmt = $pdo->prepare("UPDATE class_sections SET code=?, program=?, adviser_name=? WHERE id=?");
+
+                    while (($row = fgetcsv($handle)) !== false) {
+                        $rowNum++;
+                        $data = [];
+                        foreach ($header as $i => $col) $data[$col] = isset($row[$i]) ? trim($row[$i]) : '';
+
+                        $code      = $data['code']       ?? '';
+                        $yearLevel = (int)($data['year_level'] ?? 0);
+                        $program   = $data['program']    ?? '';
+                        $adviser   = $data['adviser_name'] ?? '';
+
+                        if (!$code || !$yearLevel) {
+                            $skipped[] = "Row $rowNum: code and year_level are required."; continue;
+                        }
+                        if ($yearLevel < 7 || $yearLevel > 12) {
+                            $skipped[] = "Row $rowNum ($code): year_level must be 7–12."; continue;
+                        }
+
+                        $existingId = $existingMap[strtolower($code)] ?? null;
+
+                        try {
+                            if ($existingId) {
+                                // Update existing section
+                                $updateStmt->execute([$code, $program ?: $code, $adviser ?: null, $existingId]);
+                                $updated++;
+                            } else {
+                                // Insert new section
+                                $insertStmt->execute([$code, $program ?: $code, $yearLevel, $adviser ?: null]);
+                                $existingMap[strtolower($code)] = (int)$pdo->lastInsertId();
+                                $imported++;
+                            }
+                        } catch (PDOException $e) {
+                            $skipped[] = "Row $rowNum ($code): " . $e->getMessage() . '.';
+                        }
+                    }
+                    fclose($handle);
+
+                    $sections = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+                    $totalSections = count($sections);
+
+                    $parts = [];
+                    if ($imported) $parts[] = "$imported section(s) added";
+                    if ($updated)  $parts[] = "$updated section(s) updated";
+                    if ($parts) {
+                        $actionSuccess = implode(', ', $parts) . '.' . ($skipped ? ' Skipped: ' . implode(' | ', $skipped) : '');
+                    } else {
+                        $actionError = 'No sections imported.' . ($skipped ? ' Issues: ' . implode(' | ', $skipped) : '');
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Add Section ──
+    if ($action === 'add_section') {
+        $code       = trim($_POST['section_code'] ?? '');
+        $program    = trim($_POST['section_program'] ?? '');
+        $yearLevel  = (int)($_POST['year_level'] ?? 0);
+        $adviser    = trim($_POST['adviser_name'] ?? '');
+
+        if (!$code || !$yearLevel) {
+            $actionError = 'Section code and year level are required.';
+        } else {
+            try {
+                $pdo->prepare("INSERT INTO class_sections (code, program, year_level, adviser_name) VALUES (?,?,?,?)")
+                    ->execute([$code, $program ?: $code, $yearLevel, $adviser ?: null]);
+                $actionSuccess = "Section \"{$code}\" added successfully!";
+            } catch (PDOException $e) {
+                $actionError = $e->getCode() === '23000' ? 'A section with that code already exists.' : $e->getMessage();
+            }
+        }
+        $sections = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+        $totalSections = count($sections);
+    }
+
+    // ── Rename Section ──
+    if ($action === 'rename_section') {
+        $sid        = (int)($_POST['section_id'] ?? 0);
+        $code       = trim($_POST['section_code'] ?? '');
+        $program    = trim($_POST['section_program'] ?? '');
+        $adviser    = trim($_POST['adviser_name'] ?? '');
+
+        if (!$sid || !$code) {
+            $actionError = 'Section ID and code are required.';
+        } else {
+            $pdo->prepare("UPDATE class_sections SET code=?, program=?, adviser_name=? WHERE id=?")
+                ->execute([$code, $program ?: $code, $adviser ?: null, $sid]);
+            $actionSuccess = "Section updated successfully!";
+        }
+        $sections = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+        $totalSections = count($sections);
+    }
+
+    // ── Delete Section ──
+    if ($action === 'delete_section') {
+        $sid = (int)($_POST['section_id'] ?? 0);
+        try {
+            $pdo->prepare("DELETE FROM class_sections WHERE id=?")->execute([$sid]);
+            header('Location: admin-dashboard.php?tab=sections&msg=section_deleted');
+            exit;
+        } catch (PDOException $e) {
+            $actionError = 'Cannot delete section — it may have students or assignments linked to it.';
+            $sections = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+        }
+    }
 }
 
 $appData = [
@@ -296,7 +445,7 @@ if (!$encoded) $encoded = '{}';
     </button>
     <div class="logo">
         <img src="favicon/android-chrome-192x192.png" alt="Admin"/>
-        <span>Admin<br>Panel</span>
+        <span>Admin Panel</span>
     </div>
     <nav class="nav-menu">
         <a href="#" class="nav-link tooltip-enabled" data-module="overview" data-tooltip="Overview" aria-label="Overview">
@@ -314,6 +463,13 @@ if (!$encoded) $encoded = '{}';
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
             <span>Teachers</span>
+        </a>
+        <a href="#" class="nav-link tooltip-enabled" data-module="sections" data-tooltip="Sections" aria-label="Sections">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span>Sections</span>
         </a>
     </nav>
     <div class="logout">
