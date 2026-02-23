@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const data        = window.__APP_DATA__ || {};
     const stats       = data.stats       || {};
     const teachers    = data.teachers    || [];
-    const flash       = data.flash       || {};
+    let flash         = data.flash       || {};
     const activeTab   = data.activeTab   || 'overview';
-    const urlMsg      = data.urlMsg      || '';
+    let urlMsg        = data.urlMsg      || '';
 
     // Sidebar
     toggleBtn.addEventListener('click', () => {
@@ -137,12 +137,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function flashHTML() {
-        if (urlMsg === 'deleted')         return `<div class="flash-msg success">&#10003; Teacher deleted successfully.</div>`;
-        if (urlMsg === 'status_updated')  return `<div class="flash-msg success">&#10003; Teacher status updated.</div>`;
-        if (urlMsg === 'section_deleted') return `<div class="flash-msg success">&#10003; Section deleted successfully.</div>`;
-        if (flash.success)                return `<div class="flash-msg success">&#10003; ${flash.success}</div>`;
-        if (flash.error)                  return `<div class="flash-msg error">&#10007; ${flash.error}</div>`;
+        if (urlMsg === 'deleted')         return `<div class="flash-msg success flash-auto-dismiss">&#10003; Teacher deleted successfully.</div>`;
+        if (urlMsg === 'status_updated')  return `<div class="flash-msg success flash-auto-dismiss">&#10003; Teacher status updated.</div>`;
+        if (urlMsg === 'section_deleted') return `<div class="flash-msg success flash-auto-dismiss">&#10003; Section deleted successfully.</div>`;
+        if (flash.success)                return `<div class="flash-msg success flash-auto-dismiss">&#10003; ${flash.success}</div>`;
+        if (flash.error)                  return `<div class="flash-msg error flash-auto-dismiss">&#10007; ${flash.error}</div>`;
         return '';
+    }
+
+    function dismissFlash() {
+        // Clear the variables so re-renders don't show it again
+        urlMsg = '';
+        flash  = {};
+
+        // Remove msg param from URL silently
+        const url = new URL(window.location);
+        url.searchParams.delete('msg');
+        window.history.replaceState({}, '', url);
+
+        // Fade out and remove any visible flash messages
+        document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
+            el.style.transition = 'opacity 0.3s ease';
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 300);
+        });
+    }
+
+    // Auto-dismiss after 500ms whenever a flash is present
+    if (urlMsg || flash.success || flash.error) {
+        setTimeout(dismissFlash, 500);
     }
 
     // Overview
