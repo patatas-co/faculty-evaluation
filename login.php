@@ -7,7 +7,11 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 
 if (is_logged_in()) {
-    redirect('student-dashboard.php');
+    $role = $_SESSION['user_role'] ?? '';
+    if ($role === 'super_admin')  redirect('manage-admins.php');
+    elseif ($role === 'admin')    redirect('admin-dashboard.php');
+    elseif ($role === 'faculty')  redirect('faculty-dashboard.php');
+    else                          redirect('student-dashboard.php');
 }
 
 $pdo = get_pdo();
@@ -49,7 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $updateStmt = $pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?');
             $updateStmt->execute([$user['id']]);
 
-            if ($user['role'] === 'admin') {
+            if ($user['role'] === 'super_admin') {
+    redirect('manage-admins.php');
+} elseif ($user['role'] === 'admin') {
     redirect('admin-dashboard.php');
 } elseif ($user['role'] === 'faculty') {
     redirect('faculty-dashboard.php');
