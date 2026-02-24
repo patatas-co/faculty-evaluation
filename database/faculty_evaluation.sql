@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 22, 2026 at 03:04 AM
+-- Generation Time: Feb 24, 2026 at 06:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -20,6 +20,49 @@ SET time_zone = "+00:00";
 --
 -- Database: `faculty_evaluation`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_action_logs`
+--
+
+CREATE TABLE `admin_action_logs` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `actor_name` varchar(191) NOT NULL DEFAULT 'System',
+  `action` varchar(60) NOT NULL,
+  `target_name` varchar(191) NOT NULL DEFAULT '',
+  `target_email` varchar(191) NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin_action_logs`
+--
+
+INSERT INTO `admin_action_logs` (`id`, `actor_name`, `action`, `target_name`, `target_email`, `created_at`) VALUES
+(1, 'Charles Arias', 'Deactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 12:10:02'),
+(2, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 12:10:04'),
+(3, 'Charles Arias', 'Created admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:11:04'),
+(4, 'Charles Arias', 'Deactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:53'),
+(5, 'Charles Arias', 'Reactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:54'),
+(6, 'Charles Arias', 'Deactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:54'),
+(7, 'Charles Arias', 'Reactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:55'),
+(8, 'Charles Arias', 'Deactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:55'),
+(9, 'Charles Arias', 'Reactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:56'),
+(10, 'Charles Arias', 'Deactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:56'),
+(11, 'Charles Arias', 'Reactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:57'),
+(12, 'Charles Arias', 'Deactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:58'),
+(13, 'Charles Arias', 'Reactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:58'),
+(14, 'Charles Arias', 'Deactivated admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:24:58'),
+(15, 'Charles Arias', 'Deleted admin', 'Denise Alia Sernande', 'daasernande1014@dihs.edu.ph', '2026-02-24 12:48:04'),
+(16, 'Charles Arias', 'Deleted admin', 'Super Owner', 'superowner@dihs.edu.ph', '2026-02-24 12:48:15'),
+(17, 'Charles Arias', 'Deactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 12:59:38'),
+(18, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 12:59:49'),
+(19, 'Charles Arias', 'Deactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:10:22'),
+(20, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:10:25'),
+(21, 'Charles Arias', 'Deactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:11:38'),
+(22, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:12:29');
 
 -- --------------------------------------------------------
 
@@ -344,7 +387,7 @@ CREATE TABLE `faculty_assignments` (
 --
 
 INSERT INTO `faculty_assignments` (`id`, `faculty_user_id`, `course_offering_id`, `created_at`) VALUES
-(191, 11, 193, '2026-02-22 01:58:47');
+(192, 13, 194, '2026-02-23 12:48:26');
 
 -- --------------------------------------------------------
 
@@ -373,7 +416,7 @@ CREATE TABLE `faculty_profiles` (
 --
 
 INSERT INTO `faculty_profiles` (`id`, `user_id`, `department_id`, `employee_id`, `grade_levels`, `course_program_teaching_and_section`, `mobile_number`, `alternate_email`, `office_email`, `role`, `academic_rank`, `status`, `created_at`) VALUES
-(4, 11, 1, 'EMP-2024-00010', NULL, NULL, NULL, NULL, NULL, NULL, 'Instructor I', 'Active', '2026-02-22 01:58:47');
+(5, 13, 1, 'EMP-2024-001', NULL, NULL, NULL, NULL, NULL, NULL, 'Instructor I', 'Active', '2026-02-23 12:48:26');
 
 -- --------------------------------------------------------
 
@@ -396,7 +439,6 @@ CREATE TABLE `student_profiles` (
 --
 
 INSERT INTO `student_profiles` (`id`, `user_id`, `student_number`, `year_level`, `class_section_id`, `course_program`, `created_at`) VALUES
-(5, 8, '2021-2-005033', 7, 19, 'Grade 7 - Abelardo', '2026-02-22 01:46:06'),
 (6, 12, '2023-2-005044', 9, 24, 'Cookery', '2026-02-22 01:59:46');
 
 -- --------------------------------------------------------
@@ -410,7 +452,7 @@ CREATE TABLE `users` (
   `full_name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
-  `role` enum('student','faculty','admin') NOT NULL,
+  `role` enum('student','faculty','admin','super_admin') NOT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `email_verified` tinyint(1) DEFAULT 0,
   `last_login_at` datetime DEFAULT NULL,
@@ -423,10 +465,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`, `status`, `email_verified`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$fsy7g4i/UOXHwbXj99u4lO2cPevszGM9DohbXFHFz7Daque2Cc/XK', 'admin', 'active', 1, '2026-02-22 10:02:19', '2026-01-19 11:51:48', '2026-02-22 02:02:19'),
-(8, 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '$2y$10$rVrInAO1CPqr75ByYK43eu.ezjpxJBS0dZAsyj2J1mLsgNnAsx.Le', 'student', 'active', 0, '2026-02-22 09:47:55', '2026-02-22 01:46:06', '2026-02-22 01:47:55'),
-(11, 'Chloe Fornal', 'jcfornal@dihs.edu.com', '$2y$10$/VE3wwm/XKBOmbgcTY7My.VCEzP6qkVYYPAd5ZVcUyRSnQMRA.q02', 'faculty', 'active', 1, NULL, '2026-02-22 01:58:47', '2026-02-22 01:58:47'),
-(12, 'Charles Patrick Arias', 'cpmarias@dihs.edu.ph', '$2y$10$ETXBX5lUiSuQbwRow8TmIOC.nQsVlKZcaEWaKd7L/aE4Zyv3MuGga', 'student', 'active', 0, '2026-02-22 09:59:50', '2026-02-22 01:59:46', '2026-02-22 01:59:50');
+(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$jZmCybtGmbJ3f0nnDC2/ouHzx9QXvnYiVEl/tkMRYKqRAWw2.nPbu', 'admin', 'active', 1, '2026-02-24 13:15:51', '2026-01-19 11:51:48', '2026-02-24 05:15:51'),
+(12, 'Charles Patrick Arias', 'cpmarias@dihs.edu.ph', '$2y$10$ETXBX5lUiSuQbwRow8TmIOC.nQsVlKZcaEWaKd7L/aE4Zyv3MuGga', 'student', 'active', 0, '2026-02-24 13:15:39', '2026-02-22 01:59:46', '2026-02-24 05:15:39'),
+(13, 'Denise Alia Sernande', 'daasernande@dihs.edu.com', '$2y$10$XHCin38joCIgbiPHY1MeXuXgePpXCglja0EBfOuN01CWCsFwbnq7G', 'faculty', 'active', 1, NULL, '2026-02-23 12:48:26', '2026-02-24 01:34:40'),
+(17, 'Charles Arias', 'ariascharles00@gmail.com', '$2y$10$sEovspLDwc7zCvzoVTwWpeYWAX/iZjX89peOJPKXIWTbO.1dPVxw2', 'super_admin', 'active', 0, '2026-02-24 13:15:58', '2026-02-24 02:39:34', '2026-02-24 05:15:58');
 
 -- --------------------------------------------------------
 
@@ -451,13 +493,19 @@ CREATE TABLE `user_settings` (
 --
 
 INSERT INTO `user_settings` (`id`, `user_id`, `receive_email_reminders`, `notify_period_close`, `profile_visible_to_faculty`, `submit_anonymously`, `theme_preference`, `language_preference`, `created_at`) VALUES
-(6, 8, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:46:06'),
-(8, 11, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:58:47'),
-(9, 12, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:59:46');
+(9, 12, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:59:46'),
+(10, 13, 1, 1, 1, 1, 'light', 'en', '2026-02-23 12:48:26');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `admin_action_logs`
+--
+ALTER TABLE `admin_action_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_created` (`created_at`);
 
 --
 -- Indexes for table `class_sections`
@@ -541,6 +589,12 @@ ALTER TABLE `user_settings`
 --
 
 --
+-- AUTO_INCREMENT for table `admin_action_logs`
+--
+ALTER TABLE `admin_action_logs`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
 -- AUTO_INCREMENT for table `class_sections`
 --
 ALTER TABLE `class_sections`
@@ -574,13 +628,13 @@ ALTER TABLE `evaluations`
 -- AUTO_INCREMENT for table `faculty_assignments`
 --
 ALTER TABLE `faculty_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=192;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=195;
 
 --
 -- AUTO_INCREMENT for table `faculty_profiles`
 --
 ALTER TABLE `faculty_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `student_profiles`
@@ -592,13 +646,13 @@ ALTER TABLE `student_profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `user_settings`
 --
 ALTER TABLE `user_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
