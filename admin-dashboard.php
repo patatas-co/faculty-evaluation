@@ -46,7 +46,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'download_sections_template') 
     fputcsv($out, ['code', 'year_level', 'program', 'adviser_name']);
     fputcsv($out, ['GRADE7-SANTOS', '7', 'Grade 7 - Santos', 'Ms. Maria Santos']);
     fputcsv($out, ['GRADE8-LUNA',   '8', 'Grade 8 - Luna',   'Mr. Jose Luna']);
-    fputcsv($out, ['GRADE11-A',    '11', 'Grade 11',         '']);
+    fputcsv($out, ['GRADE11-STEM-A', '11', 'Grade 11 - STEM', '']);
+fputcsv($out, ['GRADE11-ABM-A',  '11', 'Grade 11 - ABM',  '']);
+fputcsv($out, ['GRADE11-TVL-A',  '11', 'Grade 11 - TVL',  '']);
+fputcsv($out, ['GRADE12-STEM-A', '12', 'Grade 12 - STEM', '']);
+fputcsv($out, ['GRADE12-ABM-A',  '12', 'Grade 12 - ABM',  '']);
+fputcsv($out, ['GRADE12-TVL-A',  '12', 'Grade 12 - TVL',  '']);
     fclose($out);
     exit;
 }
@@ -604,6 +609,50 @@ if (!$encoded) $encoded = '{}';
 
                 <div class="form-group">
                     <label>Class Sections</label>
+                    
+                    <!-- ═══ SEARCH & FILTER CONTROLS ═══ -->
+                    <div class="sections-search-filter">
+                        <!-- Search Bar -->
+                        <input 
+                            type="text" 
+                            id="sections-search-input" 
+                            class="sections-search" 
+                            placeholder="Search sections... (name, code, strand)"
+                            aria-label="Search class sections"
+                        />
+                        
+                        <!-- Filter Controls -->
+                        <div class="sections-filter-row">
+                            <!-- Grade Filter -->
+                            <select 
+                                id="sections-grade-filter" 
+                                class="sections-filter-select"
+                                aria-label="Filter by grade level"
+                            >
+                                <option value="">All Grades</option>
+                                <option value="7">Grade 7</option>
+                                <option value="8">Grade 8</option>
+                                <option value="9">Grade 9</option>
+                                <option value="10">Grade 10</option>
+                                <option value="11">Grade 11</option>
+                                <option value="12">Grade 12</option>
+                            </select>
+                            
+                            <!-- Strand Filter (for Grade 11-12) -->
+                            <select 
+                                id="sections-strand-filter" 
+                                class="sections-filter-select"
+                                aria-label="Filter by strand"
+                            >
+                                <option value="">All Strands</option>
+                                <option value="STEM">STEM</option>
+                                <option value="ABM">ABM</option>
+                                <option value="TVL">TVL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- ═══ END SEARCH & FILTER ═══ -->
+                    
                     <div class="sections-grid">
                         <?php
                         $byGrade = [];
@@ -612,6 +661,33 @@ if (!$encoded) $encoded = '{}';
                         }
                         ksort($byGrade);
                         foreach ($byGrade as $grade => $secs):
+                            // For Grade 11 & 12, sub-group by strand
+                            if (in_array((int)$grade, [11, 12])):
+                                $byStrand = [];
+                                foreach ($secs as $sec) {
+                                    // Extract strand from program field e.g. "Grade 11 - STEM"
+                                    $parts  = explode(' - ', $sec['program']);
+                                    $strand = count($parts) > 1 ? trim(end($parts)) : 'General';
+                                    $byStrand[$strand][] = $sec;
+                                }
+                                ksort($byStrand);
+                        ?>
+                        <div class="section-grade-group">
+                            <div class="section-grade-label">Grade <?= $grade ?></div>
+                            <?php foreach ($byStrand as $strand => $strandSecs): ?>
+                            <div class="section-strand-group">
+                                <div class="section-strand-label"><?= htmlspecialchars($strand, ENT_QUOTES) ?></div>
+                                <?php foreach ($strandSecs as $sec): ?>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="section_ids[]" value="<?= $sec['id'] ?>"/>
+                                    <span><?= htmlspecialchars($sec['code'], ENT_QUOTES) ?></span>
+                                </label>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php
+                            else:
                         ?>
                         <div class="section-grade-group">
                             <div class="section-grade-label">Grade <?= $grade ?></div>
@@ -622,7 +698,9 @@ if (!$encoded) $encoded = '{}';
                             </label>
                             <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
+                        <?php
+                            endif;
+                        endforeach; ?>
                     </div>
                 </div>
 

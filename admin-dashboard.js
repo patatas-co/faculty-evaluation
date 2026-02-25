@@ -46,7 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCloseBtn  = document.getElementById('modal-close-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
     function openModal()  { modal.hidden = false; document.body.style.overflow = 'hidden'; }
-    function closeModal() { modal.hidden = true;  document.body.style.overflow = ''; }
+    function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+        
+        // Clear search and filters when modal closes
+        if (sectionsSearchInput) sectionsSearchInput.value = '';
+        if (sectionsGradeFilter) sectionsGradeFilter.value = '';
+        if (sectionsStrandFilter) sectionsStrandFilter.value = '';
+        // Re-run filter to show all items again
+        filterSections();
+    }
     modalCloseBtn.addEventListener('click', closeModal);
     modalCancelBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
@@ -89,6 +99,142 @@ document.addEventListener('DOMContentLoaded', () => {
             csvSubmitBtn.disabled = false;
         }
     });
+
+    // Class Sections Search & Filter
+    
+    const sectionsSearchInput  = document.getElementById('sections-search-input');
+    const sectionsGradeFilter  = document.getElementById('sections-grade-filter');
+    const sectionsStrandFilter = document.getElementById('sections-strand-filter');
+    const sectionsGrid         = document.querySelector('.sections-grid');
+    const sectionCheckboxes    = document.querySelectorAll('.sections-grid .checkbox-item');
+    const sectionGradeGroups   = document.querySelectorAll('.section-grade-group');
+
+    function filterSections() {
+        const searchTerm = sectionsSearchInput.value.toLowerCase().trim();
+        const selectedGrade = sectionsGradeFilter.value;
+        const selectedStrand = sectionsStrandFilter.value;
+
+        let anyVisible = false;
+
+        // Loop through each grade group
+        sectionGradeGroups.forEach(gradeGroup => {
+            const gradeLabel = gradeGroup.querySelector('.section-grade-label');
+            const gradeText = gradeLabel ? gradeLabel.textContent : '';
+            const gradeMatch = gradeText.match(/Grade (\d+)/);
+            const grade = gradeMatch ? gradeMatch[1] : '';
+
+            let groupHasVisibleItems = false;
+
+            // Handle Grade 11-12 with strands
+            const strandGroups = gradeGroup.querySelectorAll('.section-strand-group');
+            if (strandGroups.length > 0) {
+                // This is a Grade 11-12 group with strands
+                strandGroups.forEach(strandGroup => {
+                    const strandLabel = strandGroup.querySelector('.section-strand-label');
+                    const strand = strandLabel ? strandLabel.textContent.trim() : '';
+
+                    // Check if grade and strand match filters
+                    const gradeMatchesFilter = !selectedGrade || grade === selectedGrade;
+                    const strandMatchesFilter = !selectedStrand || strand === selectedStrand;
+
+                    if (!gradeMatchesFilter || !strandMatchesFilter) {
+                        strandGroup.style.display = 'none';
+                        return;
+                    }
+
+                    strandGroup.style.display = '';
+                    const checkboxes = strandGroup.querySelectorAll('.checkbox-item');
+                    let strandHasVisibleItems = false;
+
+                    checkboxes.forEach(checkbox => {
+                        const label = checkbox.querySelector('span');
+                        const text = label ? label.textContent.toLowerCase() : '';
+                        const code = checkbox.querySelector('input').value;
+
+                        // Check if text matches search term
+                        const matchesSearch = !searchTerm || 
+                                            text.includes(searchTerm) || 
+                                            code.toLowerCase().includes(searchTerm) ||
+                                            strand.toLowerCase().includes(searchTerm);
+
+                        if (matchesSearch) {
+                            checkbox.classList.remove('filtered-out');
+                            strandHasVisibleItems = true;
+                            anyVisible = true;
+                        } else {
+                            checkbox.classList.add('filtered-out');
+                        }
+                    });
+
+                    if (!strandHasVisibleItems) {
+                        strandGroup.style.display = 'none';
+                    } else {
+                        groupHasVisibleItems = true;
+                    }
+                });
+            } else {
+                // This is Grade 7-10 (no strands)
+                const gradeMatchesFilter = !selectedGrade || grade === selectedGrade;
+                
+                if (!gradeMatchesFilter) {
+                    gradeGroup.classList.add('filtered-out-group');
+                    return;
+                }
+
+                gradeGroup.classList.remove('filtered-out-group');
+                const checkboxes = gradeGroup.querySelectorAll('.checkbox-item');
+
+                checkboxes.forEach(checkbox => {
+                    const label = checkbox.querySelector('span');
+                    const text = label ? label.textContent.toLowerCase() : '';
+                    const code = checkbox.querySelector('input').value;
+
+                    const matchesSearch = !searchTerm || 
+                                        text.includes(searchTerm) || 
+                                        code.toLowerCase().includes(searchTerm);
+
+                    if (matchesSearch) {
+                        checkbox.classList.remove('filtered-out');
+                        groupHasVisibleItems = true;
+                        anyVisible = true;
+                    } else {
+                        checkbox.classList.add('filtered-out');
+                    }
+                });
+            }
+
+            if (!groupHasVisibleItems) {
+                gradeGroup.classList.add('filtered-out-group');
+            } else {
+                gradeGroup.classList.remove('filtered-out-group');
+            }
+        });
+
+        // Show/hide "no results" message
+        let noResultsMsg = document.getElementById('sections-no-results-msg');
+        if (!anyVisible) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.id = 'sections-no-results-msg';
+                noResultsMsg.className = 'sections-no-results visible';
+                noResultsMsg.textContent = 'No sections match your search or filters.';
+                sectionsGrid.parentElement.insertBefore(noResultsMsg, sectionsGrid);
+            } else {
+                noResultsMsg.classList.add('visible');
+            }
+        } else {
+            if (noResultsMsg) {
+                noResultsMsg.classList.remove('visible');
+            }
+        }
+    }
+
+    // Attach event listeners
+    if (sectionsSearchInput) {
+        sectionsSearchInput.addEventListener('input', filterSections);
+        sectionsGradeFilter.addEventListener('change', filterSections);
+        sectionsStrandFilter.addEventListener('change', filterSections);
+    }
 
     // Confirm dialog
     let confirmCallback = null;

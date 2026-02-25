@@ -462,6 +462,93 @@
     cursor: pointer;
 }
 
+   /* ── Class Sections Search & Filter Styles ── */
+
+.sections-search-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.sections-search {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.sections-search:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.sections-search::placeholder {
+    color: #94a3b8;
+}
+
+.sections-filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.sections-filter-select {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.sections-filter-select:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+/* Hidden state for filtered-out checkboxes */
+.checkbox-item.filtered-out {
+    display: none;
+}
+
+/* Hidden state for filtered-out grade groups */
+.section-grade-group.filtered-out-group {
+    display: none;
+}
+
+/* Optional: Subtle fade for filtered groups with no results */
+.sections-grid.has-filter-applied {
+    opacity: 1;
+}
+
+/* Show message when no results match filter */
+.sections-no-results {
+    padding: 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border: 1px dashed #cbd5e1;
+    display: none;
+}
+
+.sections-no-results.visible {
+    display: block;
+}
+
 .sections-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -729,4 +816,22 @@
     height: 18px;
     flex-shrink: 0;
 }
+
+.section-strand-group {
+    margin-top: 8px;
+    padding-left: 10px;
+    border-left: 3px solid #e2e8f0;
+}
+
+.section-strand-label {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #4caf50;
+    margin-bottom: 6px;
+    margin-top: 4px;
+}
+
+
 
