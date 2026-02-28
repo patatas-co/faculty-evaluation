@@ -117,6 +117,128 @@ document.addEventListener('DOMContentLoaded', () => {
         if (grid)  grid.style.display  = (noneChecked || visibleCount === 0) ? 'none' : '';
     }
 
+    function filterEditSections() {
+    const searchInput  = document.getElementById('edit-sections-search');
+    const gradeFilter  = document.getElementById('edit-sections-grade-filter');
+    const strandFilter = document.getElementById('edit-sections-strand-filter');
+    const grid         = document.getElementById('edit-sections-grid');
+    if (!searchInput || !grid) return;
+
+    const searchTerm     = searchInput.value.toLowerCase().trim();
+    const selectedGrade  = gradeFilter.value;
+    const selectedStrand = strandFilter.value;
+    let anyVisible = false;
+
+    grid.querySelectorAll('.section-grade-group').forEach(gradeGroup => {
+        const gradeText  = gradeGroup.querySelector('.section-grade-label')?.textContent || '';
+        const gradeMatch = gradeText.match(/Grade (\d+)/);
+        const grade      = gradeMatch ? gradeMatch[1] : '';
+        let groupVisible = false;
+
+        const strandGroups = gradeGroup.querySelectorAll('.section-strand-group');
+        if (strandGroups.length > 0) {
+            strandGroups.forEach(sg => {
+                const strand = sg.querySelector('.section-strand-label')?.textContent.trim() || '';
+                const gradeOk  = !selectedGrade  || grade  === selectedGrade;
+                const strandOk = !selectedStrand || strand === selectedStrand;
+                if (!gradeOk || !strandOk) { sg.style.display = 'none'; return; }
+                sg.style.display = '';
+                let sgVisible = false;
+                sg.querySelectorAll('.checkbox-item').forEach(cb => {
+                    const text = (cb.querySelector('span')?.textContent || '').toLowerCase();
+                    const show = !searchTerm || text.includes(searchTerm) || strand.toLowerCase().includes(searchTerm);
+                    cb.classList.toggle('filtered-out', !show);
+                    if (show) { sgVisible = true; anyVisible = true; }
+                });
+                if (!sgVisible) sg.style.display = 'none';
+                else groupVisible = true;
+            });
+        } else {
+            const gradeOk = !selectedGrade || grade === selectedGrade;
+            if (!gradeOk) { gradeGroup.classList.add('filtered-out-group'); return; }
+            gradeGroup.classList.remove('filtered-out-group');
+            gradeGroup.querySelectorAll('.checkbox-item').forEach(cb => {
+                const text = (cb.querySelector('span')?.textContent || '').toLowerCase();
+                const show = !searchTerm || text.includes(searchTerm);
+                cb.classList.toggle('filtered-out', !show);
+                if (show) { groupVisible = true; anyVisible = true; }
+            });
+        }
+        gradeGroup.classList.toggle('filtered-out-group', !groupVisible);
+    });
+
+    // No results message
+    let noMsg = document.getElementById('edit-sections-no-results');
+    if (!anyVisible) {
+        if (!noMsg) {
+            noMsg = document.createElement('div');
+            noMsg.id = 'edit-sections-no-results';
+            noMsg.className = 'sections-no-results visible';
+            noMsg.textContent = 'No sections match your search or filters.';
+            grid.parentElement.insertBefore(noMsg, grid);
+        } else { noMsg.classList.add('visible'); }
+    } else if (noMsg) { noMsg.classList.remove('visible'); }
+}
+
+    function filterEditSubjectsBySelectedSections() {
+    const editModal      = document.getElementById('edit-teacher-modal');
+    if (!editModal) return;
+    const sectionCbs     = editModal.querySelectorAll('input[name="section_ids[]"]');
+    const courseItems    = editModal.querySelectorAll('.edit-course-checkbox-item');
+    const hint           = editModal.querySelector('#edit-subjects-filter-hint');
+    const noMsg          = editModal.querySelector('#edit-no-subjects-msg');
+    const grid           = editModal.querySelector('#edit-courses-grid');
+
+    if (!courseItems.length) return;
+
+    const checkedGrades  = new Set();
+    const checkedStrands = new Set();
+
+    sectionCbs.forEach(cb => {
+        if (!cb.checked) return;
+        const label = cb.closest('label');
+        if (!label) return;
+        const text = (label.querySelector('span')?.textContent || '').toUpperCase();
+        const gradeMatch = text.match(/GRADE(\d+)/);
+        if (gradeMatch) checkedGrades.add(parseInt(gradeMatch[1]));
+        ['STEM','ABM','TVL','HUMSS'].forEach(s => {
+            if (text.includes(s)) checkedStrands.add(s);
+        });
+    });
+
+    const noneChecked = checkedGrades.size === 0;
+    if (hint) hint.style.display = noneChecked ? '' : 'none';
+
+    let visibleCount = 0;
+    courseItems.forEach(item => {
+        if (noneChecked) {
+            item.classList.add('subject-hidden');
+            item.querySelector('input').checked = false;
+            return;
+        }
+        const itemGrade  = parseInt(item.dataset.grade || '0');
+        const itemStrand = (item.dataset.strand || '').toUpperCase().trim();
+        let show = false;
+        if (checkedGrades.has(itemGrade)) {
+            if (itemGrade === 11 || itemGrade === 12) {
+                if (!itemStrand || checkedStrands.has(itemStrand)) show = true;
+            } else {
+                show = true;
+            }
+        }
+        if (show) {
+            item.classList.remove('subject-hidden');
+            visibleCount++;
+        } else {
+            item.classList.add('subject-hidden');
+            item.querySelector('input').checked = false;
+        }
+    });
+
+    if (noMsg) noMsg.style.display = (!noneChecked && visibleCount === 0) ? '' : 'none';
+    if (grid)  grid.style.display  = (noneChecked || visibleCount === 0) ? 'none' : '';
+}
+
     function openModal() {
         modal.hidden = false;
         document.body.style.overflow = 'hidden';
@@ -160,9 +282,23 @@ document.addEventListener('DOMContentLoaded', () => {
     csvModalCancel.addEventListener('click', closeCsvModal);
     csvModal.addEventListener('click', e => { if (e.target === csvModal) closeCsvModal(); });
     function closeEditModal() {
-        const m = document.getElementById('edit-teacher-modal');
-        if (m) { m.hidden = true; document.body.style.overflow = ''; }
+    const m = document.getElementById('edit-teacher-modal');
+    if (m) {
+        m.hidden = true;
+        document.body.style.overflow = '';
+        m.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        filterEditSubjectsBySelectedSections();
     }
+}
+
+    const es = document.getElementById('edit-sections-search');
+const eg = document.getElementById('edit-sections-grade-filter');
+const est = document.getElementById('edit-sections-strand-filter');
+if (es) es.value = '';
+if (eg) eg.value = '';
+if (est) est.value = '';
+filterEditSections();
+
     document.getElementById('edit-modal-close')?.addEventListener('click', closeEditModal);
     document.getElementById('edit-modal-cancel')?.addEventListener('click', closeEditModal);
     csvFileInput.addEventListener('change', () => {
@@ -561,15 +697,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     tbody.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('edit-teacher-id').value    = btn.dataset.id;
-            document.getElementById('edit-teacher-name').value  = btn.dataset.name;
-            document.getElementById('edit-academic-rank').value = btn.dataset.rank;
-            document.getElementById('edit-password').value      = '';
-            document.getElementById('edit-teacher-modal').hidden = false;
-            document.body.style.overflow = 'hidden';
+    btn.addEventListener('click', () => {
+        document.getElementById('edit-teacher-id').value    = btn.dataset.id;
+        document.getElementById('edit-teacher-name').value  = btn.dataset.name;
+        document.getElementById('edit-academic-rank').value = btn.dataset.rank;
+        document.getElementById('edit-password').value      = '';
+        // Uncheck all boxes and reset subject filter
+        const editModal = document.getElementById('edit-teacher-modal');
+        editModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        filterEditSubjectsBySelectedSections();
+        // Wire section checkboxes to re-filter subjects on change
+        editModal.querySelectorAll('input[name="section_ids[]"]').forEach(cb => {
+            cb.removeEventListener('change', filterEditSubjectsBySelectedSections);
+            cb.addEventListener('change', filterEditSubjectsBySelectedSections);
         });
+        // Wire search/filter for edit sections
+document.getElementById('edit-sections-search')?.addEventListener('input', filterEditSections);
+document.getElementById('edit-sections-grade-filter')?.addEventListener('change', filterEditSections);
+document.getElementById('edit-sections-strand-filter')?.addEventListener('change', filterEditSections);
+        editModal.hidden = false;
+        document.body.style.overflow = 'hidden';
     });
+});
 }
 
 function submitTeacherAction(payload) {

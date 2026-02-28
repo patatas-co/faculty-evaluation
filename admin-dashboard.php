@@ -967,29 +967,103 @@ if (!$encoded) $encoded = '{}';
                 </div>
 
                 <div class="form-section-title">Subject Assignments</div>
-                <p class="form-hint">Select subjects and sections for this teacher.</p>
+                <p class="form-hint">Select sections first — subjects will filter automatically by grade and strand.</p>
                 <div class="form-group">
                     <div class="form-section-title">Subjects (Courses)</div>
-                    <div class="checkbox-grid">
-                        <?php foreach ($courses as $course): ?>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="course_ids[]" value="<?= $course['id'] ?>"/>
-                            <span><?= htmlspecialchars($course['name'], ENT_QUOTES) ?></span>
-                        </label>
-                        <?php endforeach; ?>
-                    </div>
+<div id="edit-subjects-filter-hint" class="subjects-filter-hint">
+    &#9432; Select a class section below to see available subjects.
+</div>
+<div class="checkbox-grid" id="edit-courses-grid" style="display:none">
+    <?php foreach ($subjectsForForm as $subj): ?>
+    <label class="checkbox-item course-checkbox-item edit-course-checkbox-item"
+           data-grade="<?= (int)$subj['grade_level'] ?>"
+           data-strand="<?= htmlspecialchars(strtoupper($subj['strand'] ?? ''), ENT_QUOTES) ?>">
+        <input type="checkbox" name="subject_ids[]" value="<?= $subj['id'] ?>"/>
+        <span><?= htmlspecialchars($subj['name'], ENT_QUOTES) ?></span>
+    </label>
+    <?php endforeach; ?>
+</div>
+<div id="edit-no-subjects-msg" class="subjects-filter-hint" style="display:none;color:#ef4444;">
+    No subjects found for the selected sections.
+</div>
                 </div>
                 <div class="form-group">
-                    <div class="form-section-title">Class Sections</div>
-                    <div class="checkbox-grid">
-                        <?php foreach ($sections as $sec): ?>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="section_ids[]" value="<?= $sec['id'] ?>"/>
-                            <span><?= htmlspecialchars($sec['code'], ENT_QUOTES) ?></span>
-                        </label>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
+    <div class="form-section-title">Class Sections</div>
+    <div class="sections-search-filter">
+        <input
+            type="text"
+            id="edit-sections-search"
+            class="sections-search"
+            placeholder="Search sections... (name, code, strand)"
+            aria-label="Search class sections"
+        />
+        <div class="sections-filter-row">
+            <select id="edit-sections-grade-filter" class="sections-filter-select" aria-label="Filter by grade level">
+                <option value="">All Grades</option>
+                <option value="7">Grade 7</option>
+                <option value="8">Grade 8</option>
+                <option value="9">Grade 9</option>
+                <option value="10">Grade 10</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
+            </select>
+            <select id="edit-sections-strand-filter" class="sections-filter-select" aria-label="Filter by strand">
+                <option value="">All Strands</option>
+                <option value="STEM">STEM</option>
+                <option value="ABM">ABM</option>
+                <option value="TVL">TVL</option>
+                <option value="HUMSS">HUMSS</option>
+            </select>
+        </div>
+    </div>
+    <div class="sections-grid" id="edit-sections-grid">
+        <?php
+        $byGrade = [];
+        foreach ($sections as $sec) {
+            $byGrade[$sec['year_level']][] = $sec;
+        }
+        ksort($byGrade);
+        foreach ($byGrade as $grade => $secs):
+            if (in_array((int)$grade, [11, 12])):
+                $byStrand = [];
+                foreach ($secs as $sec) {
+                    $parts  = explode(' - ', $sec['program']);
+                    $strand = count($parts) > 1 ? trim(end($parts)) : 'General';
+                    $byStrand[$strand][] = $sec;
+                }
+                ksort($byStrand);
+        ?>
+        <div class="section-grade-group">
+            <div class="section-grade-label">Grade <?= $grade ?></div>
+            <?php foreach ($byStrand as $strand => $strandSecs): ?>
+            <div class="section-strand-group">
+                <div class="section-strand-label"><?= htmlspecialchars($strand, ENT_QUOTES) ?></div>
+                <?php foreach ($strandSecs as $sec): ?>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="section_ids[]" value="<?= $sec['id'] ?>"/>
+                    <span><?= htmlspecialchars($sec['code'], ENT_QUOTES) ?></span>
+                </label>
+                <?php endforeach; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php
+            else:
+        ?>
+        <div class="section-grade-group">
+            <div class="section-grade-label">Grade <?= $grade ?></div>
+            <?php foreach ($secs as $sec): ?>
+            <label class="checkbox-item">
+                <input type="checkbox" name="section_ids[]" value="<?= $sec['id'] ?>"/>
+                <span><?= htmlspecialchars($sec['code'], ENT_QUOTES) ?></span>
+            </label>
+            <?php endforeach; ?>
+        </div>
+        <?php
+            endif;
+        endforeach; ?>
+    </div>
+</div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" id="edit-modal-cancel">Cancel</button>
