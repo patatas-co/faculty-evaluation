@@ -832,6 +832,302 @@
     margin-bottom: 6px;
     margin-top: 4px;
 }
+/* ── Class Sections Collapsible ── */
+.sections-collapsible {
+    overflow: hidden;
+    max-height: 300px;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+.sections-collapsible.expanded { max-height: 2000px; }
+.sections-showmore-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+    background: #fff;
+    user-select: none;
+    transition: background 0.2s ease;
+}
+.sections-showmore-btn:hover { background: #f5f5f5; }
+.sections-arrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+    color: #333;
+}
+.sections-arrow.expanded { transform: rotate(-180deg); }
+
+/* ── Subjects Module ── */
+
+/* Filter bar */
+.subjects-filter-bar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.subjects-filter-steps {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.subjects-filter-step {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 160px;
+}
+
+/* Strand and Search steps are hidden until triggered */
+.subjects-strand-step,
+.subjects-search-step {
+    opacity: 0;
+    transform: translateX(-8px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    /* Keep in flow but invisible so layout doesn't jump */
+    visibility: hidden;
+}
+
+.subjects-strand-step.visible,
+.subjects-search-step.visible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.subjects-filter-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.subjects-step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #4caf50;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.subjects-filter-select-lg {
+    padding: 9px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 160px;
+}
+
+.subjects-filter-select-lg:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+    background: #fff;
+}
+
+.subjects-search-input-lg {
+    padding: 9px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 180px;
+}
+
+.subjects-search-input-lg:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+    background: #fff;
+}
+
+/* "Select a grade" prompt */
+.subjects-grade-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 60px 24px;
+    background: #fff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.subjects-grade-prompt p {
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.subjects-grade-prompt strong {
+    color: #4caf50;
+}
+
+.subjects-empty-icon {
+    width: 40px;
+    height: 40px;
+    color: #cbd5e1;
+}
+
+/* Empty state inside list */
+.subjects-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 24px;
+}
+
+/* Strand blocks & chips */
+.subject-strand-block {
+    margin-bottom: 16px;
+}
+
+.subject-strand-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #4caf50;
+    margin-bottom: 10px;
+    padding-left: 2px;
+}
+
+.subjects-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.subject-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.subject-chip:hover {
+    border-color: #4caf50;
+    box-shadow: 0 2px 8px rgba(76,175,80,0.12);
+}
+
+.subject-chip-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.subject-chip-desc {
+    font-size: 0.78rem;
+    color: #94a3b8;
+}
+
+.subject-chip-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.2s, background 0.2s;
+}
+
+.subject-chip-delete:hover {
+    color: #ef4444;
+    background: rgba(239,68,68,0.08);
+}
+
+/* Modal strand group animation */
+.subjects-modal-strand-group {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    pointer-events: none;
+}
+
+.subjects-modal-strand-group.visible {
+    max-height: 120px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Legacy search input (used elsewhere, keep for safety) */
+.subjects-search-input {
+    flex: 1;
+    min-width: 180px;
+    padding: 9px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.subjects-search-input:focus {
+    border-color: #4caf50;
+}
 
 
 
+
+/* ── Subject filter hint in Add Teacher modal ── */
+.subjects-filter-hint {
+    font-size: 0.83rem;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
+/* Hide course checkboxes that don't match selected sections */
+.course-checkbox-item.subject-hidden {
+    display: none;
+}

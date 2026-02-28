@@ -69,8 +69,25 @@ if (isset($_GET['action']) && $_GET['action'] === 'download_csv_template') {
     fputcsv($out, ['full_name','email','password','employee_id','academic_rank','department','course_codes','section_codes']);
     $sampleCourses  = implode('|', array_slice($courses_list, 0, 2));
     $sampleSections = implode('|', array_slice($sections_list, 0, 2));
-    fputcsv($out, ['Maria Santos','msantos@dihs.edu.ph','changeme123','EMP-2024-001','Instructor I','Mathematics',$sampleCourses,$sampleSections]);
-    fputcsv($out, ['Jose Reyes','jreyes@dihs.edu.ph','changeme123','EMP-2024-002','Teacher II','Science','','']);
+    fputcsv($out, ['Maria Santos','msantos@dihs.edu.ph','changeme123','198747','Instructor I','Mathematics',$sampleCourses,$sampleSections]);
+    fputcsv($out, ['Jose Reyes','jreyes@dihs.edu.ph','changeme123','0912387','Teacher II','Science','','']);
+    fclose($out);
+    exit;
+}
+
+// ── Subjects CSV Template Download ──
+if (isset($_GET['action']) && $_GET['action'] === 'download_subjects_template') {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="subjects_import_template.csv"');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    $out = fopen('php://output', 'w');
+    fputcsv($out, ['name', 'grade_level', 'strand', 'description']);
+    fputcsv($out, ['General Mathematics',  '11', 'STEM', '']);
+    fputcsv($out, ['Basic Calculus',        '11', 'STEM', '']);
+    fputcsv($out, ['Business Mathematics',  '11', 'ABM',  '']);
+    fputcsv($out, ['Empowerment Technology','11', 'TVL',  'ICT track']);
+    fputcsv($out, ['Oral Communication',    '11', '',     'General SHS subject']);
+    fputcsv($out, ['Araling Panlipunan',    '7',  '',     '']);
     fclose($out);
     exit;
 }
@@ -100,9 +117,20 @@ $teachersStmt = $pdo->query(
 $teachers = $teachersStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ── Departments & Courses & Sections for add form ──
-$departments = $pdo->query("SELECT id, name FROM departments ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$courses     = $pdo->query("SELECT id, name FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sections    = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+$departments     = $pdo->query("SELECT id, name FROM departments ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$courses         = $pdo->query("SELECT id, name FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$sections        = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
+// Subjects with grade_level + strand for dynamic filtering in Add Teacher modal
+$subjectsForForm = [];
+try {
+    $subjectsForForm = $pdo->query("SELECT id, name, grade_level, strand FROM subjects ORDER BY grade_level, strand, name")->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) { $subjectsForForm = []; }
+
+// ── Subjects list ──
+$subjects = [];
+try {
+    $subjects = $pdo->query("SELECT id, name, description, grade_level, strand FROM subjects ORDER BY grade_level, strand, name")->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) { $subjects = []; }
 
 // ── Handle POST actions ──
 $actionError   = '';
@@ -110,7 +138,49 @@ $actionSuccess = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    if ($action === 'edit_teacher') {
+    $userId   = (int)($_POST['user_id'] ?? 0);
+    $rank     = trim($_POST['academic_rank'] ?? '');
+    $password = $_POST['new_password'] ?? '';
 
+    // Update rank
+    $pdo->prepare("UPDATE faculty_profiles SET academic_rank=? WHERE user_id=?")
+        ->execute([$rank, $userId]);
+
+    // Update assignments — clear existing then re-add
+    $courseIds  = array_map('intval', $_POST['course_ids']  ?? []);
+    $sectionIds = array_map('intval', $_POST['section_ids'] ?? []);
+
+    // Delete old assignments
+    $pdo->prepare("DELETE fa FROM faculty_assignments fa
+                   JOIN course_offerings co ON co.id = fa.course_offering_id
+                   WHERE fa.faculty_user_id = ?")->execute([$userId]);
+
+    // Add new assignments
+    if ($courseIds && $sectionIds) {
+        $coStmt = $pdo->prepare("SELECT id FROM course_offerings WHERE course_id=? AND class_section_id=? AND is_active=1 LIMIT 1");
+        $faStmt = $pdo->prepare("INSERT IGNORE INTO faculty_assignments (faculty_user_id, course_offering_id) VALUES (?,?)");
+        foreach ($courseIds as $cid) {
+            foreach ($sectionIds as $sid) {
+                $coStmt->execute([$cid, $sid]);
+                $co = $coStmt->fetchColumn();
+                if (!$co) {
+                    $pdo->prepare("INSERT INTO course_offerings (course_id, class_section_id, is_active, academic_year) VALUES (?,?,1,'2024-2025')")->execute([$cid, $sid]);
+                    $co = (int)$pdo->lastInsertId();
+                }
+                if ($co) $faStmt->execute([$userId, $co]);
+            }
+        }
+    }
+
+    // Update password only if provided
+    if (!empty($password)) {
+        $pdo->prepare("UPDATE users SET password_hash=? WHERE id=?")
+            ->execute([password_hash($password, PASSWORD_BCRYPT), $userId]);
+    }
+
+    $actionSuccess = 'Teacher updated successfully.';
+}
     // Add teacher
     if ($action === 'add_teacher') {
         $fullName     = trim($_POST['full_name'] ?? '');
@@ -119,7 +189,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $employeeId   = trim($_POST['employee_id'] ?? '');
         $academicRank = trim($_POST['academic_rank'] ?? '');
         $deptId       = (int)($_POST['department_id'] ?? 0);
-        $courseIds    = array_map('intval', $_POST['course_ids'] ?? []);
+        $courseIds    = array_map('intval', $_POST['course_ids']  ?? []);
+        $subjectIds   = array_map('intval', $_POST['subject_ids'] ?? []);
+        // Merge both — subject_ids are used when the dynamic filter is active
+        $courseIds    = array_unique(array_merge($courseIds, $subjectIds));
         $sectionIds   = array_map('intval', $_POST['section_ids'] ?? []);
 
         if (!$fullName || !$email || !$password || !$employeeId) {
@@ -145,8 +218,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     foreach ($courseIds as $cid) {
                         foreach ($sectionIds as $sid) {
                             $coStmt->execute([$cid, $sid]);
-                            $co = $coStmt->fetchColumn();
-                            if ($co) $faStmt->execute([$newUserId, $co]);
+$co = $coStmt->fetchColumn();
+if (!$co) {
+    // No course_offering exists yet — create one automatically
+    $pdo->prepare("INSERT INTO course_offerings (course_id, class_section_id, is_active, academic_year) VALUES (?,?,1,'2024-2025')")
+        ->execute([$cid, $sid]);
+    $co = (int)$pdo->lastInsertId();
+}
+if ($co) $faStmt->execute([$newUserId, $co]);
                         }
                     }
                 }
@@ -282,8 +361,14 @@ exit;
                             if ($courseIds && $sectionIds) {
                                 foreach ($courseIds as $cid) foreach ($sectionIds as $sid) {
                                     $coStmt->execute([$cid, $sid]);
-                                    $co = $coStmt->fetchColumn();
-                                    if ($co) $faStmt->execute([$newUserId, $co]);
+$co = $coStmt->fetchColumn();
+if (!$co) {
+    // No course_offering exists yet — create one automatically
+    $pdo->prepare("INSERT INTO course_offerings (course_id, class_section_id, is_active, academic_year) VALUES (?,?,1,'2024-2025')")
+        ->execute([$cid, $sid]);
+    $co = (int)$pdo->lastInsertId();
+}
+if ($co) $faStmt->execute([$newUserId, $co]);
                                 }
                             }
                             $pdo->prepare("INSERT INTO user_settings (user_id) VALUES (?)")->execute([$newUserId]);
@@ -443,6 +528,116 @@ exit;
             $sections = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
         }
     }
+
+    // ── Add Subject ──
+    if ($action === 'add_subject') {
+        $subjectName = trim($_POST['subject_name'] ?? '');
+        $subjectDesc = trim($_POST['subject_desc'] ?? '');
+        $gradeLevel  = (int)($_POST['subject_grade'] ?? 0);
+        $strand      = trim($_POST['subject_strand'] ?? '');
+        if (!$subjectName || !$gradeLevel) {
+            $actionError = 'Subject name and grade level are required.';
+        } else {
+            $strandVal = in_array($gradeLevel, [11, 12]) ? ($strand ?: null) : null;
+            try {
+                $pdo->prepare("INSERT INTO subjects (name, description, grade_level, strand) VALUES (?,?,?,?)")
+                    ->execute([$subjectName, $subjectDesc ?: null, $gradeLevel, $strandVal]);
+                $actionSuccess = "Subject \"{$subjectName}\" added successfully!";
+            } catch (PDOException $e) {
+                $actionError = $e->getCode() === '23000' ? 'Subject already exists.' : $e->getMessage();
+            }
+        }
+        $subjects = $pdo->query("SELECT id, name, description, grade_level, strand FROM subjects ORDER BY grade_level, strand, name")->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ── Delete Subject ──
+    if ($action === 'delete_subject') {
+        $sid = (int)($_POST['subject_id'] ?? 0);
+        $pdo->prepare("DELETE FROM subjects WHERE id=?")->execute([$sid]);
+        header('Location: admin-dashboard.php?tab=subjects&msg=subject_deleted');
+        exit;
+    }
+
+    // ── Import Subjects CSV ──
+    if ($action === 'import_subjects_csv') {
+        $file = $_FILES['subjects_csv_file'] ?? null;
+        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+            $actionError = 'No file uploaded or upload error.';
+        } elseif (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) !== 'csv') {
+            $actionError = 'Please upload a valid .csv file.';
+        } else {
+            $handle = fopen($file['tmp_name'], 'r');
+            if (!$handle) {
+                $actionError = 'Could not read the uploaded file.';
+            } else {
+                $header      = array_map('strtolower', array_map('trim', fgetcsv($handle)));
+                $missingCols = array_diff(['name', 'grade_level'], $header);
+                if ($missingCols) {
+                    $actionError = 'CSV missing required columns: ' . implode(', ', $missingCols);
+                    fclose($handle);
+                } else {
+                    $imported = 0; $updated = 0; $skipped = []; $rowNum = 1;
+
+                    // Build existing map: "name|grade|strand" => id
+                    $existingMap = [];
+                    foreach ($pdo->query("SELECT id, name, grade_level, strand FROM subjects")->fetchAll(PDO::FETCH_ASSOC) as $s) {
+                        $key = strtolower(trim($s['name'])) . '|' . $s['grade_level'] . '|' . strtolower($s['strand'] ?? '');
+                        $existingMap[$key] = $s['id'];
+                    }
+
+                    $insertStmt = $pdo->prepare("INSERT INTO subjects (name, description, grade_level, strand) VALUES (?,?,?,?)");
+                    $updateStmt = $pdo->prepare("UPDATE subjects SET description=? WHERE id=?");
+
+                    while (($row = fgetcsv($handle)) !== false) {
+                        $rowNum++;
+                        $data = [];
+                        foreach ($header as $i => $col) $data[$col] = isset($row[$i]) ? trim($row[$i]) : '';
+
+                        $name       = $data['name']        ?? '';
+                        $gradeLevel = (int)($data['grade_level'] ?? 0);
+                        $strand     = trim($data['strand']  ?? '');
+                        $desc       = trim($data['description'] ?? '');
+
+                        if (!$name || !$gradeLevel) {
+                            $skipped[] = "Row $rowNum: name and grade_level are required."; continue;
+                        }
+                        if ($gradeLevel < 7 || $gradeLevel > 12) {
+                            $skipped[] = "Row $rowNum ($name): grade_level must be 7–12."; continue;
+                        }
+                        // Only allow strand for SHS
+                        $strandVal = in_array($gradeLevel, [11, 12]) ? ($strand ?: null) : null;
+
+                        $key = strtolower($name) . '|' . $gradeLevel . '|' . strtolower($strandVal ?? '');
+
+                        try {
+                            if (isset($existingMap[$key])) {
+                                $updateStmt->execute([$desc ?: null, $existingMap[$key]]);
+                                $updated++;
+                            } else {
+                                $insertStmt->execute([$name, $desc ?: null, $gradeLevel, $strandVal]);
+                                $existingMap[$key] = (int)$pdo->lastInsertId();
+                                $imported++;
+                            }
+                        } catch (PDOException $e) {
+                            $skipped[] = "Row $rowNum ($name): " . $e->getMessage() . '.';
+                        }
+                    }
+                    fclose($handle);
+
+                    $subjects = $pdo->query("SELECT id, name, description, grade_level, strand FROM subjects ORDER BY grade_level, strand, name")->fetchAll(PDO::FETCH_ASSOC);
+
+                    $parts = [];
+                    if ($imported) $parts[] = "$imported subject(s) added";
+                    if ($updated)  $parts[] = "$updated subject(s) updated";
+                    if ($parts) {
+                        $actionSuccess = implode(', ', $parts) . '.' . ($skipped ? ' Skipped: ' . implode(' | ', $skipped) : '');
+                    } else {
+                        $actionError = 'No subjects imported.' . ($skipped ? ' Issues: ' . implode(' | ', $skipped) : '');
+                    }
+                }
+            }
+        }
+    }
 }
 
 $appData = [
@@ -451,6 +646,7 @@ $appData = [
     'departments'=> $departments,
     'courses'    => $courses,
     'sections'   => $sections,
+    'subjects'   => $subjects,
     'flash'      => ['error' => $actionError, 'success' => $actionSuccess],
     'activeTab'  => $_GET['tab'] ?? 'overview',
     'urlMsg'     => $_GET['msg'] ?? '',
@@ -517,6 +713,12 @@ if (!$encoded) $encoded = '{}';
             </svg>
             <span>Sections</span>
         </a>
+        <a href="#" class="nav-link tooltip-enabled" data-module="subjects" data-tooltip="Subjects" aria-label="Subjects">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+    <span>Subjects</span>
+</a>
     </nav>
     <div class="logout">
         <a href="logout.php" class="logout-btn tooltip-enabled" data-tooltip="Logout" aria-label="Logout">
@@ -557,21 +759,21 @@ if (!$encoded) $encoded = '{}';
                 <div class="form-row">
                     <div class="form-group">
                         <label for="full_name">Full Name <span class="required">*</span></label>
-                        <input type="text" id="full_name" name="full_name" placeholder="e.g. Maria Santos" required/>
+                        <input type="text" id="full_name" name="full_name" autocomplete="name" placeholder="e.g. Maria Santos" required/>
                     </div>
                     <div class="form-group">
                         <label for="email">Email <span class="required">*</span></label>
-                        <input type="email" id="email" name="email" placeholder="e.g. msantos@dihs.edu.ph" required/>
+                        <input type="email" id="email" name="email" autocomplete="email" placeholder="e.g. msantos@dihs.edu.ph" required/>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="password">Password <span class="required">*</span></label>
-                        <input type="password" id="password" name="password" placeholder="Set initial password" required/>
+                        <input type="password" id="password" name="password" autocomplete="new-password" placeholder="Set initial password" required/>
                     </div>
                     <div class="form-group">
                         <label for="employee_id">Employee ID <span class="required">*</span></label>
-                        <input type="text" id="employee_id" name="employee_id" placeholder="e.g. EMP-2024-009" required/>
+                        <input type="text" id="employee_id" name="employee_id" autocomplete="off" placeholder="e.g. 096547" required/>
                     </div>
                 </div>
 
@@ -593,22 +795,31 @@ if (!$encoded) $encoded = '{}';
                 </div>
 
                 <div class="form-section-title">Subject Assignments</div>
-                <p class="form-hint">Select which subjects and sections this teacher will handle.</p>
+                <p class="form-hint">Select sections first — subjects will filter automatically by grade and strand.</p>
 
                 <div class="form-group">
-                    <label>Subjects (Courses)</label>
-                    <div class="checkbox-grid">
-                        <?php foreach ($courses as $course): ?>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="course_ids[]" value="<?= $course['id'] ?>"/>
-                            <span><?= htmlspecialchars($course['name'], ENT_QUOTES) ?></span>
+                    <div class="form-section-title">Subjects (Courses)</div>
+                    <div id="subjects-filter-hint" class="subjects-filter-hint">
+                        &#9432; Select a class section below to see available subjects.
+                    </div>
+                    <div class="checkbox-grid" id="add-courses-grid">
+                        <?php foreach ($subjectsForForm as $subj): ?>
+                        <label class="checkbox-item course-checkbox-item"
+                               data-grade="<?= (int)$subj['grade_level'] ?>"
+                               data-strand="<?= htmlspecialchars(strtoupper($subj['strand'] ?? ''), ENT_QUOTES) ?>">
+                            <input type="checkbox" name="subject_ids[]" value="<?= $subj['id'] ?>"/>
+                            <span><?= htmlspecialchars($subj['name'], ENT_QUOTES) ?></span>
                         </label>
                         <?php endforeach; ?>
+                    </div>
+                    <div id="no-subjects-msg" class="subjects-filter-hint" style="display:none;color:#ef4444;">
+                        No subjects found for the selected sections.
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Class Sections</label>
+                    <div class="form-section-title">Class Sections</div>
+                    <div class="sections-collapsible" id="sectionsCollapsible">
                     
                     <!-- ═══ SEARCH & FILTER CONTROLS ═══ -->
                     <div class="sections-search-filter">
@@ -702,6 +913,12 @@ if (!$encoded) $encoded = '{}';
                             endif;
                         endforeach; ?>
                     </div>
+                    </div><!-- end sections-collapsible -->
+
+                    <div class="sections-showmore-btn" id="sectionToggleBtn" onclick="toggleSections()">
+                        <span id="sectionsToggleText">Show more</span>
+                        <span class="sections-arrow" id="sectionsArrow">&#9660;</span>
+                    </div>
                 </div>
 
                 <div class="modal-actions">
@@ -712,6 +929,77 @@ if (!$encoded) $encoded = '{}';
         </div>
     </div>
 </div>
+<!-- Edit Teacher Modal -->
+<div class="modal-overlay" id="edit-teacher-modal" hidden>
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Edit Teacher</h2>
+            <button class="modal-close" id="edit-modal-close" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="admin-dashboard.php" id="edit-teacher-form">
+                <input type="hidden" name="action" value="edit_teacher"/>
+                <input type="hidden" name="user_id" id="edit-teacher-id"/>
+
+                <div class="form-section-title">Basic Info</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-teacher-name">Full Name</label>
+                        <input type="text" id="edit-teacher-name" name="full_name"
+                               autocomplete="name" readonly style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-academic-rank">Academic Rank</label>
+                        <input type="text" id="edit-academic-rank" name="academic_rank"
+                               autocomplete="organization-title" placeholder="e.g. Teacher I"/>
+                    </div>
+                </div>
+
+                <div class="form-section-title">Change Password <span style="font-weight:400;font-size:0.8rem;color:#94a3b8;">(leave blank to keep current)</span></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-password">New Password</label>
+                        <input type="password" id="edit-password" name="new_password"
+                               autocomplete="new-password" placeholder="Enter new password"/>
+                    </div>
+                </div>
+
+                <div class="form-section-title">Subject Assignments</div>
+                <p class="form-hint">Select subjects and sections for this teacher.</p>
+                <div class="form-group">
+                    <div class="form-section-title">Subjects (Courses)</div>
+                    <div class="checkbox-grid">
+                        <?php foreach ($courses as $course): ?>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="course_ids[]" value="<?= $course['id'] ?>"/>
+                            <span><?= htmlspecialchars($course['name'], ENT_QUOTES) ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-section-title">Class Sections</div>
+                    <div class="checkbox-grid">
+                        <?php foreach ($sections as $sec): ?>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="section_ids[]" value="<?= $sec['id'] ?>"/>
+                            <span><?= htmlspecialchars($sec['code'], ENT_QUOTES) ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="edit-modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- CSV Import Modal -->
 <div class="modal-overlay" id="csv-import-modal" hidden>
     <div class="modal" style="max-width:560px">

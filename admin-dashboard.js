@@ -45,7 +45,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal          = document.getElementById('add-teacher-modal');
     const modalCloseBtn  = document.getElementById('modal-close-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
-    function openModal()  { modal.hidden = false; document.body.style.overflow = 'hidden'; }
+    function filterSubjectsBySelectedSections() {
+        const sectionCheckboxes = modal.querySelectorAll('input[name="section_ids[]"]');
+        const courseItems       = modal.querySelectorAll('.course-checkbox-item');
+        const hint              = modal.querySelector('#subjects-filter-hint');
+        const noMsg             = modal.querySelector('#no-subjects-msg');
+        const grid              = modal.querySelector('#add-courses-grid');
+
+        if (!courseItems.length) return;
+
+        // Collect grades + strands from checked sections
+        const checkedGrades  = new Set();
+        const checkedStrands = new Set();
+
+        sectionCheckboxes.forEach(cb => {
+            if (!cb.checked) return;
+            const label = cb.closest('label');
+            if (!label) return;
+            const text  = (label.querySelector('span')?.textContent || '').toUpperCase();
+
+            // Detect grade from section code e.g. GRADE7-*, GRADE11-*
+            const gradeMatch = text.match(/GRADE(\d+)/);
+            if (gradeMatch) checkedGrades.add(parseInt(gradeMatch[1]));
+
+            // Detect strand: STEM, ABM, TVL, HUMSS in code or program
+            ['STEM','ABM','TVL','HUMSS'].forEach(s => {
+                if (text.includes(s)) checkedStrands.add(s);
+            });
+        });
+
+        const noneChecked = checkedGrades.size === 0;
+
+        // Show hint when nothing selected
+        if (hint) hint.style.display = noneChecked ? '' : 'none';
+
+        let visibleCount = 0;
+        courseItems.forEach(item => {
+            if (noneChecked) {
+                // No section selected → hide all subjects, uncheck them
+                item.classList.add('subject-hidden');
+                item.querySelector('input').checked = false;
+                return;
+            }
+
+            const itemGrade  = parseInt(item.dataset.grade || '0');
+            const itemStrand = (item.dataset.strand || '').toUpperCase();
+
+            let show = false;
+
+            if (checkedGrades.has(itemGrade)) {
+                // For SHS grades 11/12: show only if strand matches (or subject has no strand = general)
+                if (itemGrade === 11 || itemGrade === 12) {
+                    if (!itemStrand || checkedStrands.has(itemStrand)) {
+                        show = true;
+                    }
+                } else {
+                    show = true;
+                }
+            }
+
+            if (show) {
+                item.classList.remove('subject-hidden');
+                visibleCount++;
+            } else {
+                item.classList.add('subject-hidden');
+                item.querySelector('input').checked = false;
+            }
+        });
+
+        if (noMsg) noMsg.style.display = (!noneChecked && visibleCount === 0) ? '' : 'none';
+        if (grid)  grid.style.display  = (noneChecked || visibleCount === 0) ? 'none' : '';
+    }
+
+    function openModal() {
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        // Reset subject filter on open
+        filterSubjectsBySelectedSections();
+        // Wire section checkboxes to re-filter subjects on change
+        modal.querySelectorAll('input[name="section_ids[]"]').forEach(cb => {
+            cb.removeEventListener('change', filterSubjectsBySelectedSections);
+            cb.addEventListener('change', filterSubjectsBySelectedSections);
+        });
+    }
     function closeModal() {
         modal.hidden = true;
         document.body.style.overflow = '';
@@ -54,7 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sectionsSearchInput) sectionsSearchInput.value = '';
         if (sectionsGradeFilter) sectionsGradeFilter.value = '';
         if (sectionsStrandFilter) sectionsStrandFilter.value = '';
-        // Re-run filter to show all items again
+        // Uncheck all section and course checkboxes
+        modal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        // Re-run filter to reset subject visibility
+        filterSubjectsBySelectedSections();
         filterSections();
     }
     modalCloseBtn.addEventListener('click', closeModal);
@@ -74,6 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
     csvModalClose.addEventListener('click', closeCsvModal);
     csvModalCancel.addEventListener('click', closeCsvModal);
     csvModal.addEventListener('click', e => { if (e.target === csvModal) closeCsvModal(); });
+    function closeEditModal() {
+        const m = document.getElementById('edit-teacher-modal');
+        if (m) { m.hidden = true; document.body.style.overflow = ''; }
+    }
+    document.getElementById('edit-modal-close')?.addEventListener('click', closeEditModal);
+    document.getElementById('edit-modal-cancel')?.addEventListener('click', closeEditModal);
     csvFileInput.addEventListener('change', () => {
         const file = csvFileInput.files[0];
         if (file) {
@@ -265,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Nav routing
-    const modules = { overview: renderOverview, teachers: renderTeachers, sections: renderSections };
+    const modules = { overview: renderOverview, teachers: renderTeachers, sections: renderSections, subjects: renderSubjects }
     links.forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
@@ -420,6 +511,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><span class="status-pill ${t.status}"><span class="status-dot"></span>${t.status}</span></td>
             <td>
                 <div class="action-btns">
+                    <button type="button" class="action-btn action-btn-edit edit-btn"
+                        data-id="${t.id}"
+                        data-name="${t.full_name}"
+                        data-rank="${t.academic_rank || ''}">
+                        Edit
+                    </button>
                     <form method="POST" class="toggle-form" style="display:inline">
                         <input type="hidden" name="action" value="toggle_status"/>
                         <input type="hidden" name="user_id" value="${t.id}"/>
@@ -461,6 +558,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 'This will permanently delete the teacher and all their assignments. This cannot be undone.',
                 () => submitTeacherAction({ action: 'delete_teacher', user_id: userId })
             );
+        });
+    });
+    tbody.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('edit-teacher-id').value    = btn.dataset.id;
+            document.getElementById('edit-teacher-name').value  = btn.dataset.name;
+            document.getElementById('edit-academic-rank').value = btn.dataset.rank;
+            document.getElementById('edit-password').value      = '';
+            document.getElementById('edit-teacher-modal').hidden = false;
+            document.body.style.overflow = 'hidden';
         });
     });
 }
@@ -792,6 +899,383 @@ function submitTeacherAction(payload) {
                 secCode.value = `GRADE${secYearLevel.value}-`;
                 secCode.focus();
             }
+        });      
+    }
+    function renderSubjects() {
+    const subjects = data.subjects || [];
+    const urlMsg   = data.urlMsg   || '';
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function groupSubjects(list) {
+        const grouped = {};
+        list.forEach(s => {
+            const g = s.grade_level;
+            if (!grouped[g]) grouped[g] = { strands: {}, plain: [] };
+            if (s.strand) {
+                if (!grouped[g].strands[s.strand]) grouped[g].strands[s.strand] = [];
+                grouped[g].strands[s.strand].push(s);
+            } else {
+                grouped[g].plain.push(s);
+            }
+        });
+        return grouped;
+    }
+
+    function subjectChip(s) {
+        return `<div class="subject-chip">
+            <span class="subject-chip-name">${s.name}</span>
+            ${s.description ? `<span class="subject-chip-desc">${s.description}</span>` : ''}
+            <button class="subject-chip-delete" data-id="${s.id}" data-name="${s.name.replace(/"/g,'&quot;')}" title="Delete">&#10005;</button>
+        </div>`;
+    }
+
+    function renderCards(list) {
+        const grouped = groupSubjects(list);
+        const grades  = Object.keys(grouped).sort((a, b) => a - b);
+        if (!grades.length) return `<div class="module-card subjects-empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="subjects-empty-icon"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <p class="empty-table-msg">No subjects found for this selection.</p>
+        </div>`;
+
+        return grades.map(g => {
+            const hasStrands = Object.keys(grouped[g].strands).length > 0;
+            const strandBlocks = Object.keys(grouped[g].strands).sort().map(strand => `
+                <div class="subject-strand-block">
+                    <div class="subject-strand-label">${strand}</div>
+                    <div class="subjects-chip-list">
+                        ${grouped[g].strands[strand].map(s => subjectChip(s)).join('')}
+                    </div>
+                </div>`).join('');
+            const plainBlock = grouped[g].plain.length ? `
+                <div class="subjects-chip-list">
+                    ${grouped[g].plain.map(s => subjectChip(s)).join('')}
+                </div>` : '';
+
+            return `
+            <div class="module-card subject-grade-card" style="margin-bottom:20px">
+                <div class="admin-section-title">
+                    Grade ${g}
+                    <span style="font-size:0.78rem;color:#94a3b8;font-weight:500">
+                        ${grouped[g].plain.length + Object.values(grouped[g].strands).flat().length} subject(s)
+                    </span>
+                </div>
+                ${hasStrands ? strandBlocks : plainBlock}
+            </div>`;
+        }).join('');
+    }
+
+    // ── Shell HTML ────────────────────────────────────────────────────────────
+
+    content.innerHTML = `
+    ${urlMsg === 'subject_deleted' ? `<div class="flash-msg success flash-auto-dismiss">Subject deleted successfully.</div>` : ''}
+    ${flashHTML()}
+
+    <div class="subjects-filter-bar">
+
+        <div class="subjects-filter-steps">
+
+            <!-- Step 1: Grade -->
+            <div class="subjects-filter-step">
+                <label class="subjects-filter-label" for="subject-grade-filter">
+                    <span class="subjects-step-badge">1</span> Grade Level
+                </label>
+                <select id="subject-grade-filter" class="subjects-filter-select-lg">
+                    <option value="">— Select Grade —</option>
+                    ${[7,8,9,10,11,12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
+                </select>
+            </div>
+
+            <!-- Step 2: Strand (hidden until Grade 11/12 selected) -->
+            <div class="subjects-filter-step subjects-strand-step" id="strand-filter-step">
+                <label class="subjects-filter-label" for="subject-strand-filter">
+                    <span class="subjects-step-badge">2</span> Strand / Track
+                </label>
+                <select id="subject-strand-filter" class="subjects-filter-select-lg">
+                    <option value="">— All Strands —</option>
+                    ${['STEM','ABM','TVL','HUMSS'].map(s => `<option value="${s}">${s}</option>`).join('')}
+                </select>
+            </div>
+
+            <!-- Search (always visible once grade selected) -->
+            <div class="subjects-filter-step subjects-search-step" id="subject-search-step">
+                <label class="subjects-filter-label" for="subject-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;margin-right:4px;vertical-align:middle"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Search
+                </label>
+                <input type="text" id="subject-search" placeholder="Filter by subject name..." class="subjects-search-input-lg"/>
+            </div>
+
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:flex-end">
+            <button class="btn btn-outline-green" id="import-subjects-csv-btn" style="align-self:flex-end">&#8593; Import CSV</button>
+            <button class="btn btn-primary" id="add-subject-btn" style="align-self:flex-end">+ Add Subject</button>
+        </div>
+    </div>
+
+    <!-- Prompt shown before any grade is selected -->
+    <div id="subjects-no-grade-prompt" class="subjects-grade-prompt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="subjects-empty-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+        <p>Select a <strong>Grade Level</strong> above to view its subjects.</p>
+    </div>
+
+    <div id="subjects-list-container" style="display:none">
+        <!-- populated by applyFilters() -->
+    </div>
+
+    <!-- Add Subject Modal -->
+    <div class="modal-overlay" id="subject-modal" hidden>
+        <div class="modal" style="max-width:480px">
+            <div class="modal-header">
+                <h2>Add New Subject</h2>
+                <button class="modal-close" id="subject-modal-close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="admin-dashboard.php" id="subject-form">
+                    <input type="hidden" name="action" value="add_subject"/>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Grade Level <span class="required">*</span></label>
+                            <select name="subject_grade" id="subject-grade-select" required>
+                                <option value="">— Select —</option>
+                                ${[7,8,9,10,11,12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group subjects-modal-strand-group" id="strand-group">
+                            <label>Strand / Course</label>
+                            <select name="subject_strand" id="subject-strand-select">
+                                <option value="">— General —</option>
+                                ${['STEM','ABM','TVL','HUMSS'].map(s => `<option value="${s}">${s}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject Name <span class="required">*</span></label>
+                        <input type="text" name="subject_name" placeholder="e.g. General Mathematics" required/>
+                    </div>
+                    <div class="form-group">
+                        <label>Description <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+                        <input type="text" name="subject_desc" placeholder="Short description"/>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline" id="subject-modal-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>`;
+
+    // ── Wire Add Modal ────────────────────────────────────────────────────────
+
+    const modal       = document.getElementById('subject-modal');
+    const gradeSelect = document.getElementById('subject-grade-select');
+    const strandGroup = document.getElementById('strand-group');
+
+    document.getElementById('add-subject-btn').addEventListener('click', () => modal.hidden = false);
+    document.getElementById('subject-modal-close').addEventListener('click', () => modal.hidden = true);
+    document.getElementById('subject-modal-cancel').addEventListener('click', () => modal.hidden = true);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
+
+    // ── Wire Subjects CSV Import Modal ───────────────────────────────────────
+    // Inject CSV modal into DOM (outside content to avoid re-render issues)
+    if (!document.getElementById('subjects-csv-import-modal')) {
+        const csvModalEl = document.createElement('div');
+        csvModalEl.innerHTML = `
+        <div class="modal-overlay" id="subjects-csv-import-modal" hidden>
+            <div class="modal" style="max-width:540px">
+                <div class="modal-header">
+                    <h2>Import Subjects via CSV</h2>
+                    <button class="modal-close" id="subjects-csv-modal-close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="csv-format-box">
+                        <div class="csv-format-title">CSV Columns</div>
+                        <div class="csv-cols-grid">
+                            <div class="csv-col-item csv-col-required"><span class="csv-col-name">name</span><span class="csv-col-badge csv-badge-required">required</span></div>
+                            <div class="csv-col-item csv-col-required"><span class="csv-col-name">grade_level</span><span class="csv-col-badge csv-badge-required">required</span></div>
+                            <div class="csv-col-item"><span class="csv-col-name">strand</span><span class="csv-col-badge csv-badge-optional">optional</span></div>
+                            <div class="csv-col-item"><span class="csv-col-name">description</span><span class="csv-col-badge csv-badge-optional">optional</span></div>
+                        </div>
+                        <p class="csv-hint">
+                            Leave <code>strand</code> blank for general subjects (Grades 7–10 or cross-strand SHS).<br>
+                            Use <code>STEM</code>, <code>ABM</code>, <code>TVL</code>, or <code>HUMSS</code> for SHS strand-specific subjects.<br>
+                            Existing subjects with the same name + grade + strand will be <strong>updated</strong>.
+                        </p>
+                        <a href="admin-dashboard.php?action=download_subjects_template" class="csv-template-link">&#8595; Download Sample CSV Template</a>
+                    </div>
+                    <form method="POST" action="admin-dashboard.php" enctype="multipart/form-data" id="subjects-csv-form">
+                        <input type="hidden" name="action" value="import_subjects_csv"/>
+                        <div class="csv-dropzone" id="subjects-csv-dropzone">
+                            <p class="csv-drop-text">Drag &amp; drop your CSV here, or <label for="subjects_csv_file" class="csv-browse-label">browse</label></p>
+                            <p class="csv-drop-hint" id="subjects-csv-file-name">Only .csv files accepted</p>
+                            <input type="file" name="subjects_csv_file" id="subjects_csv_file" accept=".csv" class="csv-file-input"/>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline" id="subjects-csv-modal-cancel">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="subjects-csv-submit" disabled>Import Subjects</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(csvModalEl.firstElementChild);
+    }
+
+    const subCsvModal    = document.getElementById('subjects-csv-import-modal');
+    const subCsvClose    = document.getElementById('subjects-csv-modal-close');
+    const subCsvCancel   = document.getElementById('subjects-csv-modal-cancel');
+    const subCsvInput    = document.getElementById('subjects_csv_file');
+    const subCsvSubmit   = document.getElementById('subjects-csv-submit');
+    const subCsvFileName = document.getElementById('subjects-csv-file-name');
+    const subCsvDropzone = document.getElementById('subjects-csv-dropzone');
+
+    function openSubCsvModal()  { subCsvModal.hidden = false; document.body.style.overflow = 'hidden'; }
+    function closeSubCsvModal() { subCsvModal.hidden = true;  document.body.style.overflow = ''; }
+
+    subCsvClose.addEventListener('click', closeSubCsvModal);
+    subCsvCancel.addEventListener('click', closeSubCsvModal);
+    subCsvModal.addEventListener('click', e => { if (e.target === subCsvModal) closeSubCsvModal(); });
+
+    subCsvInput.addEventListener('change', () => {
+        const file = subCsvInput.files[0];
+        if (file) {
+            subCsvFileName.textContent = file.name;
+            subCsvDropzone.classList.add('csv-dropzone-ready');
+            subCsvSubmit.disabled = false;
+        } else {
+            subCsvFileName.textContent = 'Only .csv files accepted';
+            subCsvDropzone.classList.remove('csv-dropzone-ready');
+            subCsvSubmit.disabled = true;
+        }
+    });
+    subCsvDropzone.addEventListener('dragover', e => { e.preventDefault(); subCsvDropzone.classList.add('csv-dropzone-drag'); });
+    subCsvDropzone.addEventListener('dragleave', e => { if (!subCsvDropzone.contains(e.relatedTarget)) subCsvDropzone.classList.remove('csv-dropzone-drag'); });
+    subCsvDropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        subCsvDropzone.classList.remove('csv-dropzone-drag');
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.toLowerCase().endsWith('.csv')) {
+            try { const dt = new DataTransfer(); dt.items.add(file); subCsvInput.files = dt.files; } catch(err) {}
+            subCsvFileName.textContent = file.name;
+            subCsvDropzone.classList.add('csv-dropzone-ready');
+            subCsvSubmit.disabled = false;
+        }
+    });
+
+    document.getElementById('import-subjects-csv-btn').addEventListener('click', openSubCsvModal);
+
+    gradeSelect.addEventListener('change', () => {
+        const v = parseInt(gradeSelect.value);
+        if (v === 11 || v === 12) {
+            strandGroup.classList.add('visible');
+        } else {
+            strandGroup.classList.remove('visible');
+            document.getElementById('subject-strand-select').value = '';
+        }
+    });
+
+    // ── Filter Logic ──────────────────────────────────────────────────────────
+
+    const gradeFilter      = document.getElementById('subject-grade-filter');
+    const strandFilter     = document.getElementById('subject-strand-filter');
+    const strandFilterStep = document.getElementById('strand-filter-step');
+    const searchInputEl    = document.getElementById('subject-search');
+    const searchStep       = document.getElementById('subject-search-step');
+    const listContainer    = document.getElementById('subjects-list-container');
+    const noGradePrompt    = document.getElementById('subjects-no-grade-prompt');
+
+    function applyFilters() {
+        const g = gradeFilter.value;
+        const s = strandFilter.value;
+        const q = searchInputEl.value.toLowerCase().trim();
+        const isSHS = (g === '11' || g === '12');
+
+        // Show/hide strand step with animation
+        if (isSHS) {
+            strandFilterStep.classList.add('visible');
+        } else {
+            strandFilterStep.classList.remove('visible');
+            strandFilter.value = '';
+        }
+
+        // Show/hide search step
+        if (g) {
+            searchStep.classList.add('visible');
+        } else {
+            searchStep.classList.remove('visible');
+            searchInputEl.value = '';
+        }
+
+        // Show prompt vs list
+        if (!g) {
+            noGradePrompt.style.display = '';
+            listContainer.style.display = 'none';
+            return;
+        }
+
+        noGradePrompt.style.display = 'none';
+        listContainer.style.display = '';
+
+        // Apply filters
+        let filtered = subjects;
+        filtered = filtered.filter(x => String(x.grade_level) === g);
+
+        // For Grade 11/12: if a strand is selected, filter by it;
+        // if none selected, show all strands for that grade
+        if (isSHS && s) {
+            filtered = filtered.filter(x => x.strand === s);
+        }
+
+        if (q) {
+            filtered = filtered.filter(x =>
+                x.name.toLowerCase().includes(q) ||
+                (x.description || '').toLowerCase().includes(q)
+            );
+        }
+
+        listContainer.innerHTML = renderCards(filtered);
+        wireDeleteBtns();
+    }
+
+    gradeFilter.addEventListener('change', applyFilters);
+    strandFilter.addEventListener('change', applyFilters);
+    searchInputEl.addEventListener('input', applyFilters);
+
+    // ── Delete ────────────────────────────────────────────────────────────────
+
+    function wireDeleteBtns() {
+        document.querySelectorAll('.subject-chip-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                showConfirm('Delete Subject', `Delete "${btn.dataset.name}"? This cannot be undone.`, () => {
+                    const form = document.createElement('form');
+                    form.method = 'POST'; form.action = 'admin-dashboard.php';
+                    form.innerHTML = `<input type="hidden" name="action" value="delete_subject"/>
+                                      <input type="hidden" name="subject_id" value="${btn.dataset.id}"/>`;
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            });
         });
     }
-});
+    wireDeleteBtns();
+
+    // Flash auto-dismiss
+    document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
+        setTimeout(() => el.style.display = 'none', 4000);
+    });
+}
+    });
+    function toggleSections() {
+    const content = document.getElementById('sectionsCollapsible');
+    const arrow = document.getElementById('sectionsArrow');
+    const text = document.getElementById('sectionsToggleText');
+    const isExpanded = content.classList.toggle('expanded');
+    arrow.classList.toggle('expanded');
+    text.textContent = isExpanded ? 'Show less' : 'Show more';
+}

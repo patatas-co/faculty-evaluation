@@ -111,6 +111,14 @@ function deriveSectionName(string $code, string $program): string
     if ($code !== '') {
         $segments = preg_split('/[-–—]/u', $code);
         if ($segments !== false && count($segments) > 1) {
+            // For Grade 11/12 codes like GRADE11-ABM-A, return "ABM-A" instead of just "A"
+            if (count($segments) >= 3) {
+                $candidate = trim(implode('-', array_slice($segments, 2)));
+                $strand = trim($segments[1]);
+                if ($candidate !== '' && $strand !== '') {
+                    return $strand . '-' . $candidate;
+                }
+            }
             $candidate = trim((string)end($segments));
             if ($candidate !== '') {
                 return $candidate;
