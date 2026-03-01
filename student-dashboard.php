@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 session_start();
 
+// Prevent browser from caching stale assignment/faculty data
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 

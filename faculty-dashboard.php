@@ -2,6 +2,11 @@
 declare(strict_types=1);
 session_start();
 
+// Prevent browser from caching stale assignment data
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 
@@ -87,6 +92,10 @@ $evalStmt = $pdo->prepare(
     "SELECT c.name  AS course_name,
             c.code  AS course_code,
             cs.code AS section_code,
+            CONCAT(
+                COALESCE(co.semester, 'N/A'), ' — ',
+                COALESCE(co.academic_year, 'N/A')
+            ) AS period_title,
             COUNT(e.id) AS total_responses,
             ROUND(AVG(
                 (e.rating_clarity + e.rating_feedback + e.rating_engagement + e.rating_support) / 4
@@ -97,7 +106,7 @@ $evalStmt = $pdo->prepare(
      JOIN courses c              ON c.id  = co.course_id
      JOIN class_sections cs      ON cs.id = co.class_section_id
      WHERE fa.faculty_user_id = ?
-     GROUP BY fa.id
+     GROUP BY fa.id, co.semester, co.academic_year
      ORDER BY c.name"
 );
 $evalStmt->execute([$userId]);
@@ -120,19 +129,29 @@ if (isset($_SESSION['teacher_flash'])) {
 
 // ── Handle Profile Update ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_profile') {
-    $newFullName    = trim($_POST['full_name']    ?? '');
-    $newEmail       = trim($_POST['email']        ?? '');
-    $newEmployeeId  = trim($_POST['employee_id']  ?? '');
-    $newRank        = trim($_POST['academic_rank'] ?? '');
-    $newDept        = trim($_POST['department']   ?? '');
+    $newFullName = trim($_POST['full_name'] ?? '');
+    $newEmail    = trim($_POST['email']     ?? '');
 
     if ($newFullName && $newEmail) {
-        $pdo->prepare("UPDATE users SET full_name=?, email=? WHERE id=?")->execute([$newFullName, $newEmail, $userId]);
-        $pdo->prepare("UPDATE faculty_profiles SET employee_id=?, academic_rank=? WHERE user_id=?")->execute([$newEmployeeId, $newRank, $userId]);
-        $_SESSION['teacher_flash'] = ['type' => 'success', 'msg' => 'Profile updated successfully.'];
-    } else {
-        $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'Full name and email are required.'];
+    $emailCheck = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1");
+    $emailCheck->execute([$newEmail, $userId]);
+    if ($emailCheck->fetchColumn()) {
+        $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'That email address is already in use by another account.'];
+        header('Location: faculty-dashboard.php?tab=profile');
+        exit;
     }
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE users SET full_name=?, email=? WHERE id=?")->execute([$newFullName, $newEmail, $userId]);
+        $pdo->commit();
+        $_SESSION['teacher_flash'] = ['type' => 'success', 'msg' => 'Profile updated successfully.'];
+    } catch (\Exception $e) {
+        $pdo->rollBack();
+        $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'An error occurred while saving your profile. Please try again.'];
+    }
+} else {
+    $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'Full name and email are required.'];
+}
     header('Location: faculty-dashboard.php?tab=profile');
     exit;
 }

@@ -1,19 +1,19 @@
 // admin-dashboard.js
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebar    = document.querySelector('.sidebar');
-    const toggleBtn  = document.querySelector('.sidebar-toggle');
-    const links      = document.querySelectorAll('.nav-link');
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle');
+    const links = document.querySelectorAll('.nav-link');
     const tooltipEls = document.querySelectorAll('.tooltip-enabled');
-    const content    = document.getElementById('module-content');
-    const titleEl    = document.getElementById('module-title');
+    const content = document.getElementById('module-content');
+    const titleEl = document.getElementById('module-title');
     const logoutLink = document.querySelector('.logout-btn');
 
-    const data        = window.__APP_DATA__ || {};
-    const stats       = data.stats       || {};
-    const teachers    = data.teachers    || [];
-    let flash         = data.flash       || {};
-    const activeTab   = data.activeTab   || 'overview';
-    let urlMsg        = data.urlMsg      || '';
+    const data = window.__APP_DATA__ || {};
+    const stats = data.stats || {};
+    const teachers = data.teachers || [];
+    let flash = data.flash || {};
+    const activeTab = data.activeTab || 'overview';
+    let urlMsg = data.urlMsg || '';
 
     // ── Sidebar persistence ──
     const SIDEBAR_KEY = 'adminSidebarCollapsed';
@@ -42,34 +42,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Add Teacher Modal
-    const modal          = document.getElementById('add-teacher-modal');
-    const modalCloseBtn  = document.getElementById('modal-close-btn');
+    const modal = document.getElementById('add-teacher-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
     function filterSubjectsBySelectedSections() {
         const sectionCheckboxes = modal.querySelectorAll('input[name="section_ids[]"]');
-        const courseItems       = modal.querySelectorAll('.course-checkbox-item');
-        const hint              = modal.querySelector('#subjects-filter-hint');
-        const noMsg             = modal.querySelector('#no-subjects-msg');
-        const grid              = modal.querySelector('#add-courses-grid');
+        const courseItems = modal.querySelectorAll('.course-checkbox-item');
+        const hint = modal.querySelector('#subjects-filter-hint');
+        const noMsg = modal.querySelector('#no-subjects-msg');
+        const grid = modal.querySelector('#add-courses-grid');
 
         if (!courseItems.length) return;
 
         // Collect grades + strands from checked sections
-        const checkedGrades  = new Set();
+        const checkedGrades = new Set();
         const checkedStrands = new Set();
 
         sectionCheckboxes.forEach(cb => {
             if (!cb.checked) return;
             const label = cb.closest('label');
             if (!label) return;
-            const text  = (label.querySelector('span')?.textContent || '').toUpperCase();
+            const text = (label.querySelector('span')?.textContent || '').toUpperCase();
 
             // Detect grade from section code e.g. GRADE7-*, GRADE11-*
             const gradeMatch = text.match(/GRADE(\d+)/);
             if (gradeMatch) checkedGrades.add(parseInt(gradeMatch[1]));
 
             // Detect strand: STEM, ABM, TVL, HUMSS in code or program
-            ['STEM','ABM','TVL','HUMSS'].forEach(s => {
+            ['STEM', 'ABM', 'TVL', 'HUMSS'].forEach(s => {
                 if (text.includes(s)) checkedStrands.add(s);
             });
         });
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const itemGrade  = parseInt(item.dataset.grade || '0');
+            const itemGrade = parseInt(item.dataset.grade || '0');
             const itemStrand = (item.dataset.strand || '').toUpperCase();
 
             let show = false;
@@ -114,130 +114,130 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (noMsg) noMsg.style.display = (!noneChecked && visibleCount === 0) ? '' : 'none';
-        if (grid)  grid.style.display  = (noneChecked || visibleCount === 0) ? 'none' : '';
+        if (grid) grid.style.display = (noneChecked || visibleCount === 0) ? 'none' : '';
     }
 
     function filterEditSections() {
-    const searchInput  = document.getElementById('edit-sections-search');
-    const gradeFilter  = document.getElementById('edit-sections-grade-filter');
-    const strandFilter = document.getElementById('edit-sections-strand-filter');
-    const grid         = document.getElementById('edit-sections-grid');
-    if (!searchInput || !grid) return;
+        const searchInput = document.getElementById('edit-sections-search');
+        const gradeFilter = document.getElementById('edit-sections-grade-filter');
+        const strandFilter = document.getElementById('edit-sections-strand-filter');
+        const grid = document.getElementById('edit-sections-grid');
+        if (!searchInput || !grid) return;
 
-    const searchTerm     = searchInput.value.toLowerCase().trim();
-    const selectedGrade  = gradeFilter.value;
-    const selectedStrand = strandFilter.value;
-    let anyVisible = false;
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedGrade = gradeFilter.value;
+        const selectedStrand = strandFilter.value;
+        let anyVisible = false;
 
-    grid.querySelectorAll('.section-grade-group').forEach(gradeGroup => {
-        const gradeText  = gradeGroup.querySelector('.section-grade-label')?.textContent || '';
-        const gradeMatch = gradeText.match(/Grade (\d+)/);
-        const grade      = gradeMatch ? gradeMatch[1] : '';
-        let groupVisible = false;
+        grid.querySelectorAll('.section-grade-group').forEach(gradeGroup => {
+            const gradeText = gradeGroup.querySelector('.section-grade-label')?.textContent || '';
+            const gradeMatch = gradeText.match(/Grade (\d+)/);
+            const grade = gradeMatch ? gradeMatch[1] : '';
+            let groupVisible = false;
 
-        const strandGroups = gradeGroup.querySelectorAll('.section-strand-group');
-        if (strandGroups.length > 0) {
-            strandGroups.forEach(sg => {
-                const strand = sg.querySelector('.section-strand-label')?.textContent.trim() || '';
-                const gradeOk  = !selectedGrade  || grade  === selectedGrade;
-                const strandOk = !selectedStrand || strand === selectedStrand;
-                if (!gradeOk || !strandOk) { sg.style.display = 'none'; return; }
-                sg.style.display = '';
-                let sgVisible = false;
-                sg.querySelectorAll('.checkbox-item').forEach(cb => {
-                    const text = (cb.querySelector('span')?.textContent || '').toLowerCase();
-                    const show = !searchTerm || text.includes(searchTerm) || strand.toLowerCase().includes(searchTerm);
-                    cb.classList.toggle('filtered-out', !show);
-                    if (show) { sgVisible = true; anyVisible = true; }
+            const strandGroups = gradeGroup.querySelectorAll('.section-strand-group');
+            if (strandGroups.length > 0) {
+                strandGroups.forEach(sg => {
+                    const strand = sg.querySelector('.section-strand-label')?.textContent.trim() || '';
+                    const gradeOk = !selectedGrade || grade === selectedGrade;
+                    const strandOk = !selectedStrand || strand === selectedStrand;
+                    if (!gradeOk || !strandOk) { sg.style.display = 'none'; return; }
+                    sg.style.display = '';
+                    let sgVisible = false;
+                    sg.querySelectorAll('.checkbox-item').forEach(cb => {
+                        const text = (cb.querySelector('span')?.textContent || '').toLowerCase();
+                        const show = !searchTerm || text.includes(searchTerm) || strand.toLowerCase().includes(searchTerm);
+                        cb.classList.toggle('filtered-out', !show);
+                        if (show) { sgVisible = true; anyVisible = true; }
+                    });
+                    if (!sgVisible) sg.style.display = 'none';
+                    else groupVisible = true;
                 });
-                if (!sgVisible) sg.style.display = 'none';
-                else groupVisible = true;
-            });
-        } else {
-            const gradeOk = !selectedGrade || grade === selectedGrade;
-            if (!gradeOk) { gradeGroup.classList.add('filtered-out-group'); return; }
-            gradeGroup.classList.remove('filtered-out-group');
-            gradeGroup.querySelectorAll('.checkbox-item').forEach(cb => {
-                const text = (cb.querySelector('span')?.textContent || '').toLowerCase();
-                const show = !searchTerm || text.includes(searchTerm);
-                cb.classList.toggle('filtered-out', !show);
-                if (show) { groupVisible = true; anyVisible = true; }
-            });
-        }
-        gradeGroup.classList.toggle('filtered-out-group', !groupVisible);
-    });
+            } else {
+                const gradeOk = !selectedGrade || grade === selectedGrade;
+                if (!gradeOk) { gradeGroup.classList.add('filtered-out-group'); return; }
+                gradeGroup.classList.remove('filtered-out-group');
+                gradeGroup.querySelectorAll('.checkbox-item').forEach(cb => {
+                    const text = (cb.querySelector('span')?.textContent || '').toLowerCase();
+                    const show = !searchTerm || text.includes(searchTerm);
+                    cb.classList.toggle('filtered-out', !show);
+                    if (show) { groupVisible = true; anyVisible = true; }
+                });
+            }
+            gradeGroup.classList.toggle('filtered-out-group', !groupVisible);
+        });
 
-    // No results message
-    let noMsg = document.getElementById('edit-sections-no-results');
-    if (!anyVisible) {
-        if (!noMsg) {
-            noMsg = document.createElement('div');
-            noMsg.id = 'edit-sections-no-results';
-            noMsg.className = 'sections-no-results visible';
-            noMsg.textContent = 'No sections match your search or filters.';
-            grid.parentElement.insertBefore(noMsg, grid);
-        } else { noMsg.classList.add('visible'); }
-    } else if (noMsg) { noMsg.classList.remove('visible'); }
-}
+        // No results message
+        let noMsg = document.getElementById('edit-sections-no-results');
+        if (!anyVisible) {
+            if (!noMsg) {
+                noMsg = document.createElement('div');
+                noMsg.id = 'edit-sections-no-results';
+                noMsg.className = 'sections-no-results visible';
+                noMsg.textContent = 'No sections match your search or filters.';
+                grid.parentElement.insertBefore(noMsg, grid);
+            } else { noMsg.classList.add('visible'); }
+        } else if (noMsg) { noMsg.classList.remove('visible'); }
+    }
 
     function filterEditSubjectsBySelectedSections() {
-    const editModal      = document.getElementById('edit-teacher-modal');
-    if (!editModal) return;
-    const sectionCbs     = editModal.querySelectorAll('input[name="section_ids[]"]');
-    const courseItems    = editModal.querySelectorAll('.edit-course-checkbox-item');
-    const hint           = editModal.querySelector('#edit-subjects-filter-hint');
-    const noMsg          = editModal.querySelector('#edit-no-subjects-msg');
-    const grid           = editModal.querySelector('#edit-courses-grid');
+        const editModal = document.getElementById('edit-teacher-modal');
+        if (!editModal) return;
+        const sectionCbs = editModal.querySelectorAll('input[name="section_ids[]"]');
+        const courseItems = editModal.querySelectorAll('.edit-course-checkbox-item');
+        const hint = editModal.querySelector('#edit-subjects-filter-hint');
+        const noMsg = editModal.querySelector('#edit-no-subjects-msg');
+        const grid = editModal.querySelector('#edit-courses-grid');
 
-    if (!courseItems.length) return;
+        if (!courseItems.length) return;
 
-    const checkedGrades  = new Set();
-    const checkedStrands = new Set();
+        const checkedGrades = new Set();
+        const checkedStrands = new Set();
 
-    sectionCbs.forEach(cb => {
-        if (!cb.checked) return;
-        const label = cb.closest('label');
-        if (!label) return;
-        const text = (label.querySelector('span')?.textContent || '').toUpperCase();
-        const gradeMatch = text.match(/GRADE(\d+)/);
-        if (gradeMatch) checkedGrades.add(parseInt(gradeMatch[1]));
-        ['STEM','ABM','TVL','HUMSS'].forEach(s => {
-            if (text.includes(s)) checkedStrands.add(s);
+        sectionCbs.forEach(cb => {
+            if (!cb.checked) return;
+            const label = cb.closest('label');
+            if (!label) return;
+            const text = (label.querySelector('span')?.textContent || '').toUpperCase();
+            const gradeMatch = text.match(/GRADE(\d+)/);
+            if (gradeMatch) checkedGrades.add(parseInt(gradeMatch[1]));
+            ['STEM', 'ABM', 'TVL', 'HUMSS'].forEach(s => {
+                if (text.includes(s)) checkedStrands.add(s);
+            });
         });
-    });
 
-    const noneChecked = checkedGrades.size === 0;
-    if (hint) hint.style.display = noneChecked ? '' : 'none';
+        const noneChecked = checkedGrades.size === 0;
+        if (hint) hint.style.display = noneChecked ? '' : 'none';
 
-    let visibleCount = 0;
-    courseItems.forEach(item => {
-        if (noneChecked) {
-            item.classList.add('subject-hidden');
-            item.querySelector('input').checked = false;
-            return;
-        }
-        const itemGrade  = parseInt(item.dataset.grade || '0');
-        const itemStrand = (item.dataset.strand || '').toUpperCase().trim();
-        let show = false;
-        if (checkedGrades.has(itemGrade)) {
-            if (itemGrade === 11 || itemGrade === 12) {
-                if (!itemStrand || checkedStrands.has(itemStrand)) show = true;
-            } else {
-                show = true;
+        let visibleCount = 0;
+        courseItems.forEach(item => {
+            if (noneChecked) {
+                item.classList.add('subject-hidden');
+                item.querySelector('input').checked = false;
+                return;
             }
-        }
-        if (show) {
-            item.classList.remove('subject-hidden');
-            visibleCount++;
-        } else {
-            item.classList.add('subject-hidden');
-            item.querySelector('input').checked = false;
-        }
-    });
+            const itemGrade = parseInt(item.dataset.grade || '0');
+            const itemStrand = (item.dataset.strand || '').toUpperCase().trim();
+            let show = false;
+            if (checkedGrades.has(itemGrade)) {
+                if (itemGrade === 11 || itemGrade === 12) {
+                    if (!itemStrand || checkedStrands.has(itemStrand)) show = true;
+                } else {
+                    show = true;
+                }
+            }
+            if (show) {
+                item.classList.remove('subject-hidden');
+                visibleCount++;
+            } else {
+                item.classList.add('subject-hidden');
+                item.querySelector('input').checked = false;
+            }
+        });
 
-    if (noMsg) noMsg.style.display = (!noneChecked && visibleCount === 0) ? '' : 'none';
-    if (grid)  grid.style.display  = (noneChecked || visibleCount === 0) ? 'none' : '';
-}
+        if (noMsg) noMsg.style.display = (!noneChecked && visibleCount === 0) ? '' : 'none';
+        if (grid) grid.style.display = (noneChecked || visibleCount === 0) ? 'none' : '';
+    }
 
     function openModal() {
         modal.hidden = false;
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() {
         modal.hidden = true;
         document.body.style.overflow = '';
-        
+
         // Clear search and filters when modal closes
         if (sectionsSearchInput) sectionsSearchInput.value = '';
         if (sectionsGradeFilter) sectionsGradeFilter.value = '';
@@ -269,35 +269,35 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
     // CSV Import Modal
-    const csvModal       = document.getElementById('csv-import-modal');
-    const csvModalClose  = document.getElementById('csv-modal-close-btn');
+    const csvModal = document.getElementById('csv-import-modal');
+    const csvModalClose = document.getElementById('csv-modal-close-btn');
     const csvModalCancel = document.getElementById('csv-modal-cancel-btn');
-    const csvFileInput   = document.getElementById('csv_file');
-    const csvSubmitBtn   = document.getElementById('csv-submit-btn');
-    const csvFileNameEl  = document.getElementById('csv-file-name');
-    const csvDropzone    = document.getElementById('csv-dropzone');
-    function openCsvModal()  { csvModal.hidden = false; document.body.style.overflow = 'hidden'; }
-    function closeCsvModal() { csvModal.hidden = true;  document.body.style.overflow = ''; }
+    const csvFileInput = document.getElementById('csv_file');
+    const csvSubmitBtn = document.getElementById('csv-submit-btn');
+    const csvFileNameEl = document.getElementById('csv-file-name');
+    const csvDropzone = document.getElementById('csv-dropzone');
+    function openCsvModal() { csvModal.hidden = false; document.body.style.overflow = 'hidden'; }
+    function closeCsvModal() { csvModal.hidden = true; document.body.style.overflow = ''; }
     csvModalClose.addEventListener('click', closeCsvModal);
     csvModalCancel.addEventListener('click', closeCsvModal);
     csvModal.addEventListener('click', e => { if (e.target === csvModal) closeCsvModal(); });
     function closeEditModal() {
-    const m = document.getElementById('edit-teacher-modal');
-    if (m) {
-        m.hidden = true;
-        document.body.style.overflow = '';
-        m.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        filterEditSubjectsBySelectedSections();
+        const m = document.getElementById('edit-teacher-modal');
+        if (m) {
+            m.hidden = true;
+            document.body.style.overflow = '';
+            m.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            filterEditSubjectsBySelectedSections();
+        }
     }
-}
 
     const es = document.getElementById('edit-sections-search');
-const eg = document.getElementById('edit-sections-grade-filter');
-const est = document.getElementById('edit-sections-strand-filter');
-if (es) es.value = '';
-if (eg) eg.value = '';
-if (est) est.value = '';
-filterEditSections();
+    const eg = document.getElementById('edit-sections-grade-filter');
+    const est = document.getElementById('edit-sections-strand-filter');
+    if (es) es.value = '';
+    if (eg) eg.value = '';
+    if (est) est.value = '';
+    filterEditSections();
 
     document.getElementById('edit-modal-close')?.addEventListener('click', closeEditModal);
     document.getElementById('edit-modal-cancel')?.addEventListener('click', closeEditModal);
@@ -320,7 +320,7 @@ filterEditSections();
         csvDropzone.classList.remove('csv-dropzone-drag');
         const file = e.dataTransfer.files[0];
         if (file && file.name.toLowerCase().endsWith('.csv')) {
-            try { const dt = new DataTransfer(); dt.items.add(file); csvFileInput.files = dt.files; } catch(err) {}
+            try { const dt = new DataTransfer(); dt.items.add(file); csvFileInput.files = dt.files; } catch (err) { }
             csvFileNameEl.textContent = file.name;
             csvDropzone.classList.add('csv-dropzone-ready');
             csvSubmitBtn.disabled = false;
@@ -328,13 +328,13 @@ filterEditSections();
     });
 
     // Class Sections Search & Filter
-    
-    const sectionsSearchInput  = document.getElementById('sections-search-input');
-    const sectionsGradeFilter  = document.getElementById('sections-grade-filter');
+
+    const sectionsSearchInput = document.getElementById('sections-search-input');
+    const sectionsGradeFilter = document.getElementById('sections-grade-filter');
     const sectionsStrandFilter = document.getElementById('sections-strand-filter');
-    const sectionsGrid         = document.querySelector('.sections-grid');
-    const sectionCheckboxes    = document.querySelectorAll('.sections-grid .checkbox-item');
-    const sectionGradeGroups   = document.querySelectorAll('.section-grade-group');
+    const sectionsGrid = document.querySelector('.sections-grid');
+    const sectionCheckboxes = document.querySelectorAll('.sections-grid .checkbox-item');
+    const sectionGradeGroups = document.querySelectorAll('.section-grade-group');
 
     function filterSections() {
         const searchTerm = sectionsSearchInput.value.toLowerCase().trim();
@@ -379,10 +379,10 @@ filterEditSections();
                         const code = checkbox.querySelector('input').value;
 
                         // Check if text matches search term
-                        const matchesSearch = !searchTerm || 
-                                            text.includes(searchTerm) || 
-                                            code.toLowerCase().includes(searchTerm) ||
-                                            strand.toLowerCase().includes(searchTerm);
+                        const matchesSearch = !searchTerm ||
+                            text.includes(searchTerm) ||
+                            code.toLowerCase().includes(searchTerm) ||
+                            strand.toLowerCase().includes(searchTerm);
 
                         if (matchesSearch) {
                             checkbox.classList.remove('filtered-out');
@@ -402,7 +402,7 @@ filterEditSections();
             } else {
                 // This is Grade 7-10 (no strands)
                 const gradeMatchesFilter = !selectedGrade || grade === selectedGrade;
-                
+
                 if (!gradeMatchesFilter) {
                     gradeGroup.classList.add('filtered-out-group');
                     return;
@@ -416,9 +416,9 @@ filterEditSections();
                     const text = label ? label.textContent.toLowerCase() : '';
                     const code = checkbox.querySelector('input').value;
 
-                    const matchesSearch = !searchTerm || 
-                                        text.includes(searchTerm) || 
-                                        code.toLowerCase().includes(searchTerm);
+                    const matchesSearch = !searchTerm ||
+                        text.includes(searchTerm) ||
+                        code.toLowerCase().includes(searchTerm);
 
                     if (matchesSearch) {
                         checkbox.classList.remove('filtered-out');
@@ -513,7 +513,7 @@ filterEditSections();
         const collapsed = sidebar.classList.contains('collapsed');
         tooltipEls.forEach(el => {
             if (collapsed) { el.setAttribute('data-tooltip-enabled', 'true'); el.setAttribute('tabindex', '0'); }
-            else           { el.removeAttribute('data-tooltip-enabled'); el.removeAttribute('tabindex'); }
+            else { el.removeAttribute('data-tooltip-enabled'); el.removeAttribute('tabindex'); }
         });
     }
 
@@ -522,18 +522,18 @@ filterEditSections();
     }
 
     function flashHTML() {
-    if (urlMsg === 'deleted')         return `<div class="flash-msg success flash-auto-dismiss">Teacher deleted successfully.</div>`;
-    if (urlMsg === 'status_updated')  return `<div class="flash-msg success flash-auto-dismiss">Teacher status updated.</div>`;
-    if (urlMsg === 'section_deleted') return `<div class="flash-msg success flash-auto-dismiss">Section deleted successfully.</div>`;
-    if (flash.success)                return `<div class="flash-msg success flash-auto-dismiss">${flash.success}</div>`;
-    if (flash.error)                  return `<div class="flash-msg error flash-auto-dismiss">${flash.error}</div>`;
+        if (urlMsg === 'deleted') return `<div class="flash-msg success flash-auto-dismiss">Teacher deleted successfully.</div>`;
+        if (urlMsg === 'status_updated') return `<div class="flash-msg success flash-auto-dismiss">Teacher status updated.</div>`;
+        if (urlMsg === 'section_deleted') return `<div class="flash-msg success flash-auto-dismiss">Section deleted successfully.</div>`;
+        if (flash.success) return `<div class="flash-msg success flash-auto-dismiss">${flash.success}</div>`;
+        if (flash.error) return `<div class="flash-msg error flash-auto-dismiss">${flash.error}</div>`;
         return '';
     }
 
     function dismissFlash() {
         // Clear the variables so re-renders don't show it again
         urlMsg = '';
-        flash  = {};
+        flash = {};
 
         // Remove msg param from URL silently
         const url = new URL(window.location);
@@ -628,7 +628,7 @@ filterEditSections();
 
     // Teachers
     function buildTeacherRow(t) {
-        const initials = t.full_name.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+        const initials = t.full_name.trim().split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
         return `
         <tr>
             <td>
@@ -650,7 +650,9 @@ filterEditSections();
                     <button type="button" class="action-btn action-btn-edit edit-btn"
                         data-id="${t.id}"
                         data-name="${t.full_name}"
-                        data-rank="${t.academic_rank || ''}">
+                        data-rank="${t.academic_rank || ''}"
+                        data-section-ids="${t.section_ids || ''}"
+                        data-course-ids="${t.course_ids || ''}">
                         Edit
                     </button>
                     <form method="POST" class="toggle-form" style="display:inline">
@@ -672,87 +674,98 @@ filterEditSections();
     }
 
     function attachTeacherListeners(tbody) {
-    tbody.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const form   = btn.closest('.toggle-form');
-            const userId = form.querySelector('[name="user_id"]').value;
-            const status = form.querySelector('[name="current_status"]').value;
-            const action = status === 'active' ? 'deactivate' : 'activate';
-            showConfirm(
-                `${action.charAt(0).toUpperCase() + action.slice(1)} Teacher`,
-                `Are you sure you want to ${action} this teacher?`,
-                () => submitTeacherAction({ action: 'toggle_status', user_id: userId, current_status: status })
-            );
+        tbody.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const form = btn.closest('.toggle-form');
+                const userId = form.querySelector('[name="user_id"]').value;
+                const status = form.querySelector('[name="current_status"]').value;
+                const action = status === 'active' ? 'deactivate' : 'activate';
+                showConfirm(
+                    `${action.charAt(0).toUpperCase() + action.slice(1)} Teacher`,
+                    `Are you sure you want to ${action} this teacher?`,
+                    () => submitTeacherAction({ action: 'toggle_status', user_id: userId, current_status: status })
+                );
+            });
         });
-    });
-    tbody.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const form   = btn.closest('.delete-form');
-            const userId = form.querySelector('[name="user_id"]').value;
-            showConfirm(
-                'Delete Teacher',
-                'This will permanently delete the teacher and all their assignments. This cannot be undone.',
-                () => submitTeacherAction({ action: 'delete_teacher', user_id: userId })
-            );
+        tbody.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const form = btn.closest('.delete-form');
+                const userId = form.querySelector('[name="user_id"]').value;
+                showConfirm(
+                    'Delete Teacher',
+                    'This will permanently delete the teacher and all their assignments. This cannot be undone.',
+                    () => submitTeacherAction({ action: 'delete_teacher', user_id: userId })
+                );
+            });
         });
-    });
-    tbody.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.getElementById('edit-teacher-id').value    = btn.dataset.id;
-        document.getElementById('edit-teacher-name').value  = btn.dataset.name;
-        document.getElementById('edit-academic-rank').value = btn.dataset.rank;
-        document.getElementById('edit-password').value      = '';
-        // Uncheck all boxes and reset subject filter
-        const editModal = document.getElementById('edit-teacher-modal');
-        editModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        filterEditSubjectsBySelectedSections();
-        // Wire section checkboxes to re-filter subjects on change
-        editModal.querySelectorAll('input[name="section_ids[]"]').forEach(cb => {
-            cb.removeEventListener('change', filterEditSubjectsBySelectedSections);
-            cb.addEventListener('change', filterEditSubjectsBySelectedSections);
-        });
-        // Wire search/filter for edit sections
-document.getElementById('edit-sections-search')?.addEventListener('input', filterEditSections);
-document.getElementById('edit-sections-grade-filter')?.addEventListener('change', filterEditSections);
-document.getElementById('edit-sections-strand-filter')?.addEventListener('change', filterEditSections);
-        editModal.hidden = false;
-        document.body.style.overflow = 'hidden';
-    });
-});
-}
+        tbody.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('edit-teacher-id').value = btn.dataset.id;
+                document.getElementById('edit-teacher-name').value = btn.dataset.name;
+                document.getElementById('edit-academic-rank').value = btn.dataset.rank;
+                document.getElementById('edit-password').value = '';
+                // Uncheck all boxes and reset subject filter
+                const editModal = document.getElementById('edit-teacher-modal');
+                editModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
 
-function submitTeacherAction(payload) {
-    payload._fetch = '1';
-    fetch('admin-dashboard.php', {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: new URLSearchParams(payload)
-    })
-    .then(res => { if (!res.ok) throw new Error('failed'); return fetch('admin-dashboard.php?json=teachers'); })
-    .then(res => res.json())
-    .catch(() => null)
-    .then(freshData => {
-    if (freshData && freshData.teachers) {
-        // Sync from server response
-        teachers.length = 0;
-        freshData.teachers.forEach(t => teachers.push(t));
-        Object.assign(stats, freshData.stats || {});
-    } else {
-        // Fallback: update local array immediately if server response unavailable
-        if (payload.action === 'delete_teacher') {
-            const idx = teachers.findIndex(t => String(t.id) === String(payload.user_id));
-            if (idx !== -1) teachers.splice(idx, 1);
-        }
-        if (payload.action === 'toggle_status') {
-            const teacher = teachers.find(t => String(t.id) === String(payload.user_id));
-            if (teacher) teacher.status = teacher.status === 'active' ? 'inactive' : 'active';
-        }
+                // Pre-check previously assigned sections and subjects
+                const sectionIds = (btn.dataset.sectionIds || '').split(',').filter(Boolean);
+                const courseIds = (btn.dataset.courseIds || '').split(',').filter(Boolean);
+                editModal.querySelectorAll('input[name="section_ids[]"]').forEach(cb => {
+                    if (sectionIds.includes(cb.value)) cb.checked = true;
+                });
+                editModal.querySelectorAll('input[name="subject_ids[]"]').forEach(cb => {
+                    if (courseIds.includes(cb.value)) cb.checked = true;
+                });
+
+                filterEditSubjectsBySelectedSections();
+                // Wire section checkboxes to re-filter subjects on change
+                editModal.querySelectorAll('input[name="section_ids[]"]').forEach(cb => {
+                    cb.removeEventListener('change', filterEditSubjectsBySelectedSections);
+                    cb.addEventListener('change', filterEditSubjectsBySelectedSections);
+                });
+                // Wire search/filter for edit sections
+                document.getElementById('edit-sections-search')?.addEventListener('input', filterEditSections);
+                document.getElementById('edit-sections-grade-filter')?.addEventListener('change', filterEditSections);
+                document.getElementById('edit-sections-strand-filter')?.addEventListener('change', filterEditSections);
+                editModal.hidden = false;
+                document.body.style.overflow = 'hidden';
+            });
+        });
     }
-    flash = { success: payload.action === 'toggle_status' ? 'Teacher status updated.' : 'Teacher deleted successfully.' };
-    renderTeachers();
-    setTimeout(dismissFlash, 800);
-});
-}
+
+    function submitTeacherAction(payload) {
+        payload._fetch = '1';
+        fetch('admin-dashboard.php', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: new URLSearchParams(payload)
+        })
+            .then(res => { if (!res.ok) throw new Error('failed'); return fetch('admin-dashboard.php?json=teachers'); })
+            .then(res => res.json())
+            .catch(() => null)
+            .then(freshData => {
+                if (freshData && freshData.teachers) {
+                    // Sync from server response
+                    teachers.length = 0;
+                    freshData.teachers.forEach(t => teachers.push(t));
+                    Object.assign(stats, freshData.stats || {});
+                } else {
+                    // Fallback: update local array immediately if server response unavailable
+                    if (payload.action === 'delete_teacher') {
+                        const idx = teachers.findIndex(t => String(t.id) === String(payload.user_id));
+                        if (idx !== -1) teachers.splice(idx, 1);
+                    }
+                    if (payload.action === 'toggle_status') {
+                        const teacher = teachers.find(t => String(t.id) === String(payload.user_id));
+                        if (teacher) teacher.status = teacher.status === 'active' ? 'inactive' : 'active';
+                    }
+                }
+                flash = { success: payload.action === 'toggle_status' ? 'Teacher status updated.' : 'Teacher deleted successfully.' };
+                renderTeachers();
+                setTimeout(dismissFlash, 800);
+            });
+    }
 
     function renderTeachers(filterText = '') {
         const filtered = filterText
@@ -859,7 +872,7 @@ function submitTeacherAction(payload) {
                     </table>
                 </div>
             </div>`).join('')
-        : `<div class="module-card"><p class="empty-table-msg">No sections yet. Click "+ Add Section" to create one.</p></div>`}
+                : `<div class="module-card"><p class="empty-table-msg">No sections yet. Click "+ Add Section" to create one.</p></div>`}
 
         <div class="modal-overlay" id="section-modal" hidden>
             <div class="modal" style="max-width:480px">
@@ -878,7 +891,7 @@ function submitTeacherAction(payload) {
                                 <label>Year Level <span class="required">*</span></label>
                                 <select name="year_level" id="section-year-level" required>
                                     <option value="">— Select —</option>
-                                    ${[7,8,9,10,11,12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
+                                    ${[7, 8, 9, 10, 11, 12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
                                 </select>
                             </div>
                             <div class="form-group">
@@ -903,36 +916,36 @@ function submitTeacherAction(payload) {
             </div>
         </div>`;
 
-        const secModal     = document.getElementById('section-modal');
-        const secTitle     = document.getElementById('section-modal-title');
-        const secAction    = document.getElementById('section-action');
-        const secIdInput   = document.getElementById('section-id-input');
-        const secCode      = document.getElementById('section-code-input');
-        const secProgram   = document.getElementById('section-program-input');
-        const secAdviser   = document.getElementById('section-adviser-input');
+        const secModal = document.getElementById('section-modal');
+        const secTitle = document.getElementById('section-modal-title');
+        const secAction = document.getElementById('section-action');
+        const secIdInput = document.getElementById('section-id-input');
+        const secCode = document.getElementById('section-code-input');
+        const secProgram = document.getElementById('section-program-input');
+        const secAdviser = document.getElementById('section-adviser-input');
         const secYearLevel = document.getElementById('section-year-level');
         const secSubmitBtn = document.getElementById('section-submit-btn');
 
         function openSectionModal(mode, s = {}) {
             if (mode === 'edit') {
-                secTitle.textContent     = 'Edit Section';
-                secAction.value          = 'rename_section';
-                secIdInput.value         = s.id;
-                secCode.value            = s.code;
-                secProgram.value         = s.program;
-                secAdviser.value         = s.adviser;
-                secYearLevel.value       = s.grade;
-                secYearLevel.disabled    = true;
+                secTitle.textContent = 'Edit Section';
+                secAction.value = 'rename_section';
+                secIdInput.value = s.id;
+                secCode.value = s.code;
+                secProgram.value = s.program;
+                secAdviser.value = s.adviser;
+                secYearLevel.value = s.grade;
+                secYearLevel.disabled = true;
                 secSubmitBtn.textContent = 'Save Changes';
             } else {
-                secTitle.textContent     = 'Add New Section';
-                secAction.value          = 'add_section';
-                secIdInput.value         = '';
-                secCode.value            = '';
-                secProgram.value         = '';
-                secAdviser.value         = '';
-                secYearLevel.value       = '';
-                secYearLevel.disabled    = false;
+                secTitle.textContent = 'Add New Section';
+                secAction.value = 'add_section';
+                secIdInput.value = '';
+                secCode.value = '';
+                secProgram.value = '';
+                secAdviser.value = '';
+                secYearLevel.value = '';
+                secYearLevel.disabled = false;
                 secSubmitBtn.textContent = 'Add Section';
             }
             secModal.hidden = false;
@@ -986,16 +999,16 @@ function submitTeacherAction(payload) {
             </div>
         </div>`);
 
-        const secCsvModal    = document.getElementById('sections-csv-modal');
-        const secCsvClose    = document.getElementById('sections-csv-close');
-        const secCsvCancel   = document.getElementById('sections-csv-cancel');
-        const secCsvInput    = document.getElementById('sections_csv_file');
-        const secCsvSubmit   = document.getElementById('sections-csv-submit');
+        const secCsvModal = document.getElementById('sections-csv-modal');
+        const secCsvClose = document.getElementById('sections-csv-close');
+        const secCsvCancel = document.getElementById('sections-csv-cancel');
+        const secCsvInput = document.getElementById('sections_csv_file');
+        const secCsvSubmit = document.getElementById('sections-csv-submit');
         const secCsvFileName = document.getElementById('sections-csv-file-name');
         const secCsvDropzone = document.getElementById('sections-csv-dropzone');
 
-        function openSecCsvModal()  { secCsvModal.hidden = false; document.body.style.overflow = 'hidden'; }
-        function closeSecCsvModal() { secCsvModal.hidden = true;  document.body.style.overflow = ''; }
+        function openSecCsvModal() { secCsvModal.hidden = false; document.body.style.overflow = 'hidden'; }
+        function closeSecCsvModal() { secCsvModal.hidden = true; document.body.style.overflow = ''; }
 
         secCsvClose.addEventListener('click', closeSecCsvModal);
         secCsvCancel.addEventListener('click', closeSecCsvModal);
@@ -1021,7 +1034,7 @@ function submitTeacherAction(payload) {
             secCsvDropzone.classList.remove('csv-dropzone-drag');
             const file = e.dataTransfer.files[0];
             if (file && file.name.toLowerCase().endsWith('.csv')) {
-                try { const dt = new DataTransfer(); dt.items.add(file); secCsvInput.files = dt.files; } catch(err) {}
+                try { const dt = new DataTransfer(); dt.items.add(file); secCsvInput.files = dt.files; } catch (err) { }
                 secCsvFileName.textContent = file.name;
                 secCsvDropzone.classList.add('csv-dropzone-ready');
                 secCsvSubmit.disabled = false;
@@ -1048,60 +1061,60 @@ function submitTeacherAction(payload) {
                 secCode.value = `GRADE${secYearLevel.value}-`;
                 secCode.focus();
             }
-        });      
+        });
     }
     function renderSubjects() {
-    const subjects = data.subjects || [];
-    const urlMsg   = data.urlMsg   || '';
+        const subjects = data.subjects || [];
+        const urlMsg = data.urlMsg || '';
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+        // ── Helpers ──────────────────────────────────────────────────────────────
 
-    function groupSubjects(list) {
-        const grouped = {};
-        list.forEach(s => {
-            const g = s.grade_level;
-            if (!grouped[g]) grouped[g] = { strands: {}, plain: [] };
-            if (s.strand) {
-                if (!grouped[g].strands[s.strand]) grouped[g].strands[s.strand] = [];
-                grouped[g].strands[s.strand].push(s);
-            } else {
-                grouped[g].plain.push(s);
-            }
-        });
-        return grouped;
-    }
+        function groupSubjects(list) {
+            const grouped = {};
+            list.forEach(s => {
+                const g = s.grade_level;
+                if (!grouped[g]) grouped[g] = { strands: {}, plain: [] };
+                if (s.strand) {
+                    if (!grouped[g].strands[s.strand]) grouped[g].strands[s.strand] = [];
+                    grouped[g].strands[s.strand].push(s);
+                } else {
+                    grouped[g].plain.push(s);
+                }
+            });
+            return grouped;
+        }
 
-    function subjectChip(s) {
-        return `<div class="subject-chip">
+        function subjectChip(s) {
+            return `<div class="subject-chip">
             <span class="subject-chip-name">${s.name}</span>
             ${s.description ? `<span class="subject-chip-desc">${s.description}</span>` : ''}
-            <button class="subject-chip-delete" data-id="${s.id}" data-name="${s.name.replace(/"/g,'&quot;')}" title="Delete">&#10005;</button>
+            <button class="subject-chip-delete" data-id="${s.id}" data-name="${s.name.replace(/"/g, '&quot;')}" title="Delete">&#10005;</button>
         </div>`;
-    }
+        }
 
-    function renderCards(list) {
-        const grouped = groupSubjects(list);
-        const grades  = Object.keys(grouped).sort((a, b) => a - b);
-        if (!grades.length) return `<div class="module-card subjects-empty-state">
+        function renderCards(list) {
+            const grouped = groupSubjects(list);
+            const grades = Object.keys(grouped).sort((a, b) => a - b);
+            if (!grades.length) return `<div class="module-card subjects-empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="subjects-empty-icon"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <p class="empty-table-msg">No subjects found for this selection.</p>
         </div>`;
 
-        return grades.map(g => {
-            const hasStrands = Object.keys(grouped[g].strands).length > 0;
-            const strandBlocks = Object.keys(grouped[g].strands).sort().map(strand => `
+            return grades.map(g => {
+                const hasStrands = Object.keys(grouped[g].strands).length > 0;
+                const strandBlocks = Object.keys(grouped[g].strands).sort().map(strand => `
                 <div class="subject-strand-block">
                     <div class="subject-strand-label">${strand}</div>
                     <div class="subjects-chip-list">
                         ${grouped[g].strands[strand].map(s => subjectChip(s)).join('')}
                     </div>
                 </div>`).join('');
-            const plainBlock = grouped[g].plain.length ? `
+                const plainBlock = grouped[g].plain.length ? `
                 <div class="subjects-chip-list">
                     ${grouped[g].plain.map(s => subjectChip(s)).join('')}
                 </div>` : '';
 
-            return `
+                return `
             <div class="module-card subject-grade-card" style="margin-bottom:20px">
                 <div class="admin-section-title">
                     Grade ${g}
@@ -1111,12 +1124,12 @@ function submitTeacherAction(payload) {
                 </div>
                 ${hasStrands ? strandBlocks : plainBlock}
             </div>`;
-        }).join('');
-    }
+            }).join('');
+        }
 
-    // ── Shell HTML ────────────────────────────────────────────────────────────
+        // ── Shell HTML ────────────────────────────────────────────────────────────
 
-    content.innerHTML = `
+        content.innerHTML = `
     ${urlMsg === 'subject_deleted' ? `<div class="flash-msg success flash-auto-dismiss">Subject deleted successfully.</div>` : ''}
     ${flashHTML()}
 
@@ -1131,7 +1144,7 @@ function submitTeacherAction(payload) {
                 </label>
                 <select id="subject-grade-filter" class="subjects-filter-select-lg">
                     <option value="">— Select Grade —</option>
-                    ${[7,8,9,10,11,12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
+                    ${[7, 8, 9, 10, 11, 12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
                 </select>
             </div>
 
@@ -1142,7 +1155,7 @@ function submitTeacherAction(payload) {
                 </label>
                 <select id="subject-strand-filter" class="subjects-filter-select-lg">
                     <option value="">— All Strands —</option>
-                    ${['STEM','ABM','TVL','HUMSS'].map(s => `<option value="${s}">${s}</option>`).join('')}
+                    ${['STEM', 'ABM', 'TVL', 'HUMSS'].map(s => `<option value="${s}">${s}</option>`).join('')}
                 </select>
             </div>
 
@@ -1190,14 +1203,14 @@ function submitTeacherAction(payload) {
                             <label>Grade Level <span class="required">*</span></label>
                             <select name="subject_grade" id="subject-grade-select" required>
                                 <option value="">— Select —</option>
-                                ${[7,8,9,10,11,12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
+                                ${[7, 8, 9, 10, 11, 12].map(g => `<option value="${g}">Grade ${g}</option>`).join('')}
                             </select>
                         </div>
                         <div class="form-group subjects-modal-strand-group" id="strand-group">
                             <label>Strand / Course</label>
                             <select name="subject_strand" id="subject-strand-select">
                                 <option value="">— General —</option>
-                                ${['STEM','ABM','TVL','HUMSS'].map(s => `<option value="${s}">${s}</option>`).join('')}
+                                ${['STEM', 'ABM', 'TVL', 'HUMSS'].map(s => `<option value="${s}">${s}</option>`).join('')}
                             </select>
                         </div>
                     </div>
@@ -1218,22 +1231,22 @@ function submitTeacherAction(payload) {
         </div>
     </div>`;
 
-    // ── Wire Add Modal ────────────────────────────────────────────────────────
+        // ── Wire Add Modal ────────────────────────────────────────────────────────
 
-    const modal       = document.getElementById('subject-modal');
-    const gradeSelect = document.getElementById('subject-grade-select');
-    const strandGroup = document.getElementById('strand-group');
+        const modal = document.getElementById('subject-modal');
+        const gradeSelect = document.getElementById('subject-grade-select');
+        const strandGroup = document.getElementById('strand-group');
 
-    document.getElementById('add-subject-btn').addEventListener('click', () => modal.hidden = false);
-    document.getElementById('subject-modal-close').addEventListener('click', () => modal.hidden = true);
-    document.getElementById('subject-modal-cancel').addEventListener('click', () => modal.hidden = true);
-    modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
+        document.getElementById('add-subject-btn').addEventListener('click', () => modal.hidden = false);
+        document.getElementById('subject-modal-close').addEventListener('click', () => modal.hidden = true);
+        document.getElementById('subject-modal-cancel').addEventListener('click', () => modal.hidden = true);
+        modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
 
-    // ── Wire Subjects CSV Import Modal ───────────────────────────────────────
-    // Inject CSV modal into DOM (outside content to avoid re-render issues)
-    if (!document.getElementById('subjects-csv-import-modal')) {
-        const csvModalEl = document.createElement('div');
-        csvModalEl.innerHTML = `
+        // ── Wire Subjects CSV Import Modal ───────────────────────────────────────
+        // Inject CSV modal into DOM (outside content to avoid re-render issues)
+        if (!document.getElementById('subjects-csv-import-modal')) {
+            const csvModalEl = document.createElement('div');
+            csvModalEl.innerHTML = `
         <div class="modal-overlay" id="subjects-csv-import-modal" hidden>
             <div class="modal" style="max-width:540px">
                 <div class="modal-header">
@@ -1273,154 +1286,154 @@ function submitTeacherAction(payload) {
                 </div>
             </div>
         </div>`;
-        document.body.appendChild(csvModalEl.firstElementChild);
-    }
-
-    const subCsvModal    = document.getElementById('subjects-csv-import-modal');
-    const subCsvClose    = document.getElementById('subjects-csv-modal-close');
-    const subCsvCancel   = document.getElementById('subjects-csv-modal-cancel');
-    const subCsvInput    = document.getElementById('subjects_csv_file');
-    const subCsvSubmit   = document.getElementById('subjects-csv-submit');
-    const subCsvFileName = document.getElementById('subjects-csv-file-name');
-    const subCsvDropzone = document.getElementById('subjects-csv-dropzone');
-
-    function openSubCsvModal()  { subCsvModal.hidden = false; document.body.style.overflow = 'hidden'; }
-    function closeSubCsvModal() { subCsvModal.hidden = true;  document.body.style.overflow = ''; }
-
-    subCsvClose.addEventListener('click', closeSubCsvModal);
-    subCsvCancel.addEventListener('click', closeSubCsvModal);
-    subCsvModal.addEventListener('click', e => { if (e.target === subCsvModal) closeSubCsvModal(); });
-
-    subCsvInput.addEventListener('change', () => {
-        const file = subCsvInput.files[0];
-        if (file) {
-            subCsvFileName.textContent = file.name;
-            subCsvDropzone.classList.add('csv-dropzone-ready');
-            subCsvSubmit.disabled = false;
-        } else {
-            subCsvFileName.textContent = 'Only .csv files accepted';
-            subCsvDropzone.classList.remove('csv-dropzone-ready');
-            subCsvSubmit.disabled = true;
-        }
-    });
-    subCsvDropzone.addEventListener('dragover', e => { e.preventDefault(); subCsvDropzone.classList.add('csv-dropzone-drag'); });
-    subCsvDropzone.addEventListener('dragleave', e => { if (!subCsvDropzone.contains(e.relatedTarget)) subCsvDropzone.classList.remove('csv-dropzone-drag'); });
-    subCsvDropzone.addEventListener('drop', e => {
-        e.preventDefault();
-        subCsvDropzone.classList.remove('csv-dropzone-drag');
-        const file = e.dataTransfer.files[0];
-        if (file && file.name.toLowerCase().endsWith('.csv')) {
-            try { const dt = new DataTransfer(); dt.items.add(file); subCsvInput.files = dt.files; } catch(err) {}
-            subCsvFileName.textContent = file.name;
-            subCsvDropzone.classList.add('csv-dropzone-ready');
-            subCsvSubmit.disabled = false;
-        }
-    });
-
-    document.getElementById('import-subjects-csv-btn').addEventListener('click', openSubCsvModal);
-
-    gradeSelect.addEventListener('change', () => {
-        const v = parseInt(gradeSelect.value);
-        if (v === 11 || v === 12) {
-            strandGroup.classList.add('visible');
-        } else {
-            strandGroup.classList.remove('visible');
-            document.getElementById('subject-strand-select').value = '';
-        }
-    });
-
-    // ── Filter Logic ──────────────────────────────────────────────────────────
-
-    const gradeFilter      = document.getElementById('subject-grade-filter');
-    const strandFilter     = document.getElementById('subject-strand-filter');
-    const strandFilterStep = document.getElementById('strand-filter-step');
-    const searchInputEl    = document.getElementById('subject-search');
-    const searchStep       = document.getElementById('subject-search-step');
-    const listContainer    = document.getElementById('subjects-list-container');
-    const noGradePrompt    = document.getElementById('subjects-no-grade-prompt');
-
-    function applyFilters() {
-        const g = gradeFilter.value;
-        const s = strandFilter.value;
-        const q = searchInputEl.value.toLowerCase().trim();
-        const isSHS = (g === '11' || g === '12');
-
-        // Show/hide strand step with animation
-        if (isSHS) {
-            strandFilterStep.classList.add('visible');
-        } else {
-            strandFilterStep.classList.remove('visible');
-            strandFilter.value = '';
+            document.body.appendChild(csvModalEl.firstElementChild);
         }
 
-        // Show/hide search step
-        if (g) {
-            searchStep.classList.add('visible');
-        } else {
-            searchStep.classList.remove('visible');
-            searchInputEl.value = '';
+        const subCsvModal = document.getElementById('subjects-csv-import-modal');
+        const subCsvClose = document.getElementById('subjects-csv-modal-close');
+        const subCsvCancel = document.getElementById('subjects-csv-modal-cancel');
+        const subCsvInput = document.getElementById('subjects_csv_file');
+        const subCsvSubmit = document.getElementById('subjects-csv-submit');
+        const subCsvFileName = document.getElementById('subjects-csv-file-name');
+        const subCsvDropzone = document.getElementById('subjects-csv-dropzone');
+
+        function openSubCsvModal() { subCsvModal.hidden = false; document.body.style.overflow = 'hidden'; }
+        function closeSubCsvModal() { subCsvModal.hidden = true; document.body.style.overflow = ''; }
+
+        subCsvClose.addEventListener('click', closeSubCsvModal);
+        subCsvCancel.addEventListener('click', closeSubCsvModal);
+        subCsvModal.addEventListener('click', e => { if (e.target === subCsvModal) closeSubCsvModal(); });
+
+        subCsvInput.addEventListener('change', () => {
+            const file = subCsvInput.files[0];
+            if (file) {
+                subCsvFileName.textContent = file.name;
+                subCsvDropzone.classList.add('csv-dropzone-ready');
+                subCsvSubmit.disabled = false;
+            } else {
+                subCsvFileName.textContent = 'Only .csv files accepted';
+                subCsvDropzone.classList.remove('csv-dropzone-ready');
+                subCsvSubmit.disabled = true;
+            }
+        });
+        subCsvDropzone.addEventListener('dragover', e => { e.preventDefault(); subCsvDropzone.classList.add('csv-dropzone-drag'); });
+        subCsvDropzone.addEventListener('dragleave', e => { if (!subCsvDropzone.contains(e.relatedTarget)) subCsvDropzone.classList.remove('csv-dropzone-drag'); });
+        subCsvDropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            subCsvDropzone.classList.remove('csv-dropzone-drag');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.toLowerCase().endsWith('.csv')) {
+                try { const dt = new DataTransfer(); dt.items.add(file); subCsvInput.files = dt.files; } catch (err) { }
+                subCsvFileName.textContent = file.name;
+                subCsvDropzone.classList.add('csv-dropzone-ready');
+                subCsvSubmit.disabled = false;
+            }
+        });
+
+        document.getElementById('import-subjects-csv-btn').addEventListener('click', openSubCsvModal);
+
+        gradeSelect.addEventListener('change', () => {
+            const v = parseInt(gradeSelect.value);
+            if (v === 11 || v === 12) {
+                strandGroup.classList.add('visible');
+            } else {
+                strandGroup.classList.remove('visible');
+                document.getElementById('subject-strand-select').value = '';
+            }
+        });
+
+        // ── Filter Logic ──────────────────────────────────────────────────────────
+
+        const gradeFilter = document.getElementById('subject-grade-filter');
+        const strandFilter = document.getElementById('subject-strand-filter');
+        const strandFilterStep = document.getElementById('strand-filter-step');
+        const searchInputEl = document.getElementById('subject-search');
+        const searchStep = document.getElementById('subject-search-step');
+        const listContainer = document.getElementById('subjects-list-container');
+        const noGradePrompt = document.getElementById('subjects-no-grade-prompt');
+
+        function applyFilters() {
+            const g = gradeFilter.value;
+            const s = strandFilter.value;
+            const q = searchInputEl.value.toLowerCase().trim();
+            const isSHS = (g === '11' || g === '12');
+
+            // Show/hide strand step with animation
+            if (isSHS) {
+                strandFilterStep.classList.add('visible');
+            } else {
+                strandFilterStep.classList.remove('visible');
+                strandFilter.value = '';
+            }
+
+            // Show/hide search step
+            if (g) {
+                searchStep.classList.add('visible');
+            } else {
+                searchStep.classList.remove('visible');
+                searchInputEl.value = '';
+            }
+
+            // Show prompt vs list
+            if (!g) {
+                noGradePrompt.style.display = '';
+                listContainer.style.display = 'none';
+                return;
+            }
+
+            noGradePrompt.style.display = 'none';
+            listContainer.style.display = '';
+
+            // Apply filters
+            let filtered = subjects;
+            filtered = filtered.filter(x => String(x.grade_level) === g);
+
+            // For Grade 11/12: if a strand is selected, filter by it;
+            // if none selected, show all strands for that grade
+            if (isSHS && s) {
+                filtered = filtered.filter(x => x.strand === s);
+            }
+
+            if (q) {
+                filtered = filtered.filter(x =>
+                    x.name.toLowerCase().includes(q) ||
+                    (x.description || '').toLowerCase().includes(q)
+                );
+            }
+
+            listContainer.innerHTML = renderCards(filtered);
+            wireDeleteBtns();
         }
 
-        // Show prompt vs list
-        if (!g) {
-            noGradePrompt.style.display = '';
-            listContainer.style.display = 'none';
-            return;
-        }
+        gradeFilter.addEventListener('change', applyFilters);
+        strandFilter.addEventListener('change', applyFilters);
+        searchInputEl.addEventListener('input', applyFilters);
 
-        noGradePrompt.style.display = 'none';
-        listContainer.style.display = '';
+        // ── Delete ────────────────────────────────────────────────────────────────
 
-        // Apply filters
-        let filtered = subjects;
-        filtered = filtered.filter(x => String(x.grade_level) === g);
-
-        // For Grade 11/12: if a strand is selected, filter by it;
-        // if none selected, show all strands for that grade
-        if (isSHS && s) {
-            filtered = filtered.filter(x => x.strand === s);
-        }
-
-        if (q) {
-            filtered = filtered.filter(x =>
-                x.name.toLowerCase().includes(q) ||
-                (x.description || '').toLowerCase().includes(q)
-            );
-        }
-
-        listContainer.innerHTML = renderCards(filtered);
-        wireDeleteBtns();
-    }
-
-    gradeFilter.addEventListener('change', applyFilters);
-    strandFilter.addEventListener('change', applyFilters);
-    searchInputEl.addEventListener('input', applyFilters);
-
-    // ── Delete ────────────────────────────────────────────────────────────────
-
-    function wireDeleteBtns() {
-        document.querySelectorAll('.subject-chip-delete').forEach(btn => {
-            btn.addEventListener('click', () => {
-                showConfirm('Delete Subject', `Delete "${btn.dataset.name}"? This cannot be undone.`, () => {
-                    const form = document.createElement('form');
-                    form.method = 'POST'; form.action = 'admin-dashboard.php';
-                    form.innerHTML = `<input type="hidden" name="action" value="delete_subject"/>
+        function wireDeleteBtns() {
+            document.querySelectorAll('.subject-chip-delete').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showConfirm('Delete Subject', `Delete "${btn.dataset.name}"? This cannot be undone.`, () => {
+                        const form = document.createElement('form');
+                        form.method = 'POST'; form.action = 'admin-dashboard.php';
+                        form.innerHTML = `<input type="hidden" name="action" value="delete_subject"/>
                                       <input type="hidden" name="subject_id" value="${btn.dataset.id}"/>`;
-                    document.body.appendChild(form);
-                    form.submit();
+                        document.body.appendChild(form);
+                        form.submit();
+                    });
                 });
             });
+        }
+        wireDeleteBtns();
+
+        // Flash auto-dismiss
+        document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
+            setTimeout(() => el.style.display = 'none', 4000);
         });
     }
-    wireDeleteBtns();
-
-    // Flash auto-dismiss
-    document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
-        setTimeout(() => el.style.display = 'none', 4000);
-    });
-}
-    });
-    function toggleSections() {
+});
+function toggleSections() {
     const content = document.getElementById('sectionsCollapsible');
     const arrow = document.getElementById('sectionsArrow');
     const text = document.getElementById('sectionsToggleText');

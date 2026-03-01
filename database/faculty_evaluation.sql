@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 24, 2026 at 06:17 AM
+-- Generation Time: Feb 28, 2026 at 03:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -62,7 +62,13 @@ INSERT INTO `admin_action_logs` (`id`, `actor_name`, `action`, `target_name`, `t
 (19, 'Charles Arias', 'Deactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:10:22'),
 (20, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:10:25'),
 (21, 'Charles Arias', 'Deactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:11:38'),
-(22, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:12:29');
+(22, 'Charles Arias', 'Reactivated admin', 'System Admin', 'admin@dihs.edu.ph', '2026-02-24 13:12:29'),
+(23, 'Charles Arias', 'Created admin', 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '2026-02-27 19:08:05'),
+(24, 'Charles Arias', 'Created admin', 'Chloe Fornal', 'cjfornal@dihs.edu.ph', '2026-02-27 19:18:21'),
+(25, 'Charles Arias', 'Deactivated admin', 'Chloe Fornal', 'cjfornal@dihs.edu.ph', '2026-02-27 19:18:44'),
+(26, 'Charles Arias', 'Reactivated admin', 'Chloe Fornal', 'cjfornal@dihs.edu.ph', '2026-02-27 19:18:54'),
+(27, 'Charles Arias', 'Deactivated admin', 'Chloe Fornal', 'cjfornal@dihs.edu.ph', '2026-02-27 19:32:14'),
+(28, 'Charles Arias', 'Deleted admin', 'Chloe Fornal', 'cjfornal@dihs.edu.ph', '2026-02-27 19:33:00');
 
 -- --------------------------------------------------------
 
@@ -96,12 +102,6 @@ INSERT INTO `class_sections` (`id`, `code`, `program`, `year_level`, `adviser_na
 (10, 'GRADE10-RIZAL', 'Grade 10 - Rizal', 10, 'Mr. Antonio Lopez', '2026-01-19 11:51:48'),
 (11, 'GRADE10-BONIFACIO', 'Grade 10 - Bonifacio', 10, 'Ms. Jennifer Castillo', '2026-01-19 11:51:48'),
 (12, 'GRADE10-MABINI', 'Grade 10 - Mabini', 10, 'Mrs. Rosario Santiago', '2026-01-19 11:51:48'),
-(13, 'GRADE11-A', 'Grade 11', 11, 'Ms. Angela Reyes', '2026-01-19 11:51:48'),
-(14, 'GRADE11-B', 'Grade 11', 11, 'Mr. Benjamin Santos', '2026-01-19 11:51:48'),
-(15, 'GRADE11-C', 'Grade 11', 11, 'Mrs. Cristina Lopez', '2026-01-19 11:51:48'),
-(16, 'GRADE12-A', 'Grade 12', 12, 'Mr. Daniel Martinez', '2026-01-19 11:51:48'),
-(17, 'GRADE12-B', 'Grade 12', 12, 'Ms. Elizabeth Garcia', '2026-01-19 11:51:48'),
-(18, 'GRADE12-C', 'Grade 12', 12, 'Mrs. Francisca Rodriguez', '2026-01-19 11:51:48'),
 (19, 'GRADE7-ABELARDO', 'Grade 7 - Abelardo', 7, 'Mr. Ramon Torres', '2026-01-20 02:44:48'),
 (20, 'GRADE7-JOVELLANA', 'Grade 7 - Jovellana', 7, 'Ms. Elena Ramos', '2026-01-20 02:44:48'),
 (21, 'GRADE8-RUBY', 'Grade 8 - Ruby', 8, 'Ms. Sofia Diaz', '2026-01-20 02:44:49'),
@@ -109,7 +109,19 @@ INSERT INTO `class_sections` (`id`, `code`, `program`, `year_level`, `adviser_na
 (23, 'GRADE9-TEAK', 'Grade 9 - Teak', 9, 'Mr. Antonio Reyes', '2026-01-20 02:44:49'),
 (24, 'GRADE9-OAK', 'Grade 9 - Oak', 9, 'Ms. Carmen Lopez', '2026-01-20 02:44:49'),
 (25, 'GRADE10-JACINTO', 'Grade 10 - Jacinto', 10, 'Ms. Maria Fernandez', '2026-01-20 02:44:49'),
-(26, 'GRADE10-DELPILAR', 'Grade 10 - Del Pilar', 10, 'Mr. Ricardo Cruz', '2026-01-20 02:44:49');
+(26, 'GRADE10-DELPILAR', 'Grade 10 - Del Pilar', 10, 'Mr. Ricardo Cruz', '2026-01-20 02:44:49'),
+(27, 'GRADE11-STEM-A', 'Grade 11 - STEM', 11, '', '2026-02-25 13:06:01'),
+(28, 'GRADE11-STEM-B', 'Grade 11 - STEM', 11, '', '2026-02-25 13:06:01'),
+(29, 'GRADE11-ABM-A', 'Grade 11 - ABM', 11, '', '2026-02-25 13:06:01'),
+(30, 'GRADE11-ABM-B', 'Grade 11 - ABM', 11, '', '2026-02-25 13:06:01'),
+(31, 'GRADE11-TVL-A', 'Grade 11 - TVL', 11, '', '2026-02-25 13:06:01'),
+(32, 'GRADE11-TVL-B', 'Grade 11 - TVL', 11, '', '2026-02-25 13:06:01'),
+(33, 'GRADE12-STEM-A', 'Grade 12 - STEM', 12, '', '2026-02-25 13:06:01'),
+(34, 'GRADE12-STEM-B', 'Grade 12 - STEM', 12, '', '2026-02-25 13:06:01'),
+(35, 'GRADE12-ABM-A', 'Grade 12 - ABM', 12, '', '2026-02-25 13:06:01'),
+(36, 'GRADE12-ABM-B', 'Grade 12 - ABM', 12, '', '2026-02-25 13:06:01'),
+(37, 'GRADE12-TVL-A', 'Grade 12 - TVL', 12, '', '2026-02-25 13:06:01'),
+(38, 'GRADE12-TVL-B', 'Grade 12 - TVL', 12, '', '2026-02-25 13:06:01');
 
 -- --------------------------------------------------------
 
@@ -320,7 +332,13 @@ INSERT INTO `course_offerings` (`id`, `course_id`, `class_section_id`, `is_activ
 (256, 16, 26, 1, NULL, '2024-2025', '2026-01-20 02:45:03'),
 (257, 17, 26, 1, NULL, '2024-2025', '2026-01-20 02:45:03'),
 (258, 20, 26, 1, NULL, '2024-2025', '2026-01-20 02:45:03'),
-(259, 21, 26, 1, NULL, '2024-2025', '2026-01-20 02:45:03');
+(259, 21, 26, 1, NULL, '2024-2025', '2026-01-20 02:45:03'),
+(260, 15, 27, 1, NULL, '2024-2025', '2026-02-26 13:47:20'),
+(261, 16, 27, 1, NULL, '2024-2025', '2026-02-27 11:06:23'),
+(262, 15, 29, 1, NULL, '2024-2025', '2026-02-28 11:08:07'),
+(263, 15, 31, 1, NULL, '2024-2025', '2026-02-28 11:08:07'),
+(264, 15, 35, 1, NULL, '2024-2025', '2026-02-28 11:08:07'),
+(265, 17, 27, 1, NULL, '2024-2025', '2026-02-28 11:10:26');
 
 -- --------------------------------------------------------
 
@@ -387,7 +405,7 @@ CREATE TABLE `faculty_assignments` (
 --
 
 INSERT INTO `faculty_assignments` (`id`, `faculty_user_id`, `course_offering_id`, `created_at`) VALUES
-(192, 13, 194, '2026-02-23 12:48:26');
+(209, 30, 260, '2026-02-28 11:10:58');
 
 -- --------------------------------------------------------
 
@@ -416,7 +434,7 @@ CREATE TABLE `faculty_profiles` (
 --
 
 INSERT INTO `faculty_profiles` (`id`, `user_id`, `department_id`, `employee_id`, `grade_levels`, `course_program_teaching_and_section`, `mobile_number`, `alternate_email`, `office_email`, `role`, `academic_rank`, `status`, `created_at`) VALUES
-(5, 13, 1, 'EMP-2024-001', NULL, NULL, NULL, NULL, NULL, NULL, 'Instructor I', 'Active', '2026-02-23 12:48:26');
+(12, 30, 3, 'EMP-2024-2005', NULL, NULL, NULL, NULL, NULL, NULL, 'Teacher I', 'Active', '2026-02-28 08:42:33');
 
 -- --------------------------------------------------------
 
@@ -439,7 +457,80 @@ CREATE TABLE `student_profiles` (
 --
 
 INSERT INTO `student_profiles` (`id`, `user_id`, `student_number`, `year_level`, `class_section_id`, `course_program`, `created_at`) VALUES
-(6, 12, '2023-2-005044', 9, 24, 'Cookery', '2026-02-22 01:59:46');
+(10, 27, '2023-2-005044', 11, 27, 'STEM', '2026-02-27 11:15:21');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subjects`
+--
+
+CREATE TABLE `subjects` (
+  `id` int(11) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `grade_level` tinyint(4) NOT NULL COMMENT '7 to 12',
+  `strand` varchar(50) DEFAULT NULL COMMENT 'STEM, ABM, TVL, HUMSS — only for Grade 11-12',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `subjects`
+--
+
+INSERT INTO `subjects` (`id`, `name`, `description`, `grade_level`, `strand`, `created_at`) VALUES
+(1, 'English', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(2, 'Mathematics', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(3, 'Science', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(4, 'Filipino', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(5, 'Araling Panlipunan', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(6, 'MAPEH', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(7, 'TLE', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(8, 'Values Education', NULL, 7, NULL, '2026-02-26 14:12:54'),
+(9, 'English', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(10, 'Mathematics', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(11, 'Science', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(12, 'Filipino', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(13, 'Araling Panlipunan', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(14, 'MAPEH', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(15, 'TLE', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(16, 'Values Education', NULL, 8, NULL, '2026-02-26 14:12:54'),
+(17, 'English', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(18, 'Mathematics', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(19, 'Science', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(20, 'Filipino', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(21, 'Araling Panlipunan', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(22, 'MAPEH', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(23, 'TLE', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(24, 'Values Education', NULL, 9, NULL, '2026-02-26 14:12:54'),
+(25, 'English', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(26, 'Mathematics', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(27, 'Science', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(28, 'Filipino', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(29, 'Araling Panlipunan', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(30, 'MAPEH', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(31, 'TLE', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(32, 'Values Education', NULL, 10, NULL, '2026-02-26 14:12:54'),
+(62, 'Basic Calculus', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
+(63, 'General Biology 1', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
+(64, 'General Mathematics', 'STEM Core', 11, 'STEM', '2026-02-28 14:43:56'),
+(65, 'Physics 1', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
+(66, 'Pre-Calculus', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
+(67, 'Business Mathematics', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56'),
+(68, 'Fundamentals of Accountancy', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56'),
+(69, 'Organization & Management', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56'),
+(70, 'Empowerment Technology', 'TVL Applied Subject', 11, 'TVL', '2026-02-28 14:43:56'),
+(71, 'TVL-ICT', 'TVL Specialization', 11, 'TVL', '2026-02-28 14:43:56'),
+(72, 'Basic Calculus', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
+(73, 'General Biology 2', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
+(74, 'General Mathematics', 'STEM Core', 12, 'STEM', '2026-02-28 14:44:32'),
+(75, 'Physics 2', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
+(76, 'Pre-Calculus', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
+(77, 'Business Mathematics', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32'),
+(78, 'Fundamentals of Accountancy', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32'),
+(79, 'Organization & Management', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32'),
+(80, 'Empowerment Technology', 'TVL Applied Subject', 12, 'TVL', '2026-02-28 14:44:32'),
+(81, 'TVL-ICT', 'TVL Specialization', 12, 'TVL', '2026-02-28 14:44:32');
 
 -- --------------------------------------------------------
 
@@ -465,10 +556,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`, `status`, `email_verified`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$jZmCybtGmbJ3f0nnDC2/ouHzx9QXvnYiVEl/tkMRYKqRAWw2.nPbu', 'admin', 'active', 1, '2026-02-24 13:15:51', '2026-01-19 11:51:48', '2026-02-24 05:15:51'),
-(12, 'Charles Patrick Arias', 'cpmarias@dihs.edu.ph', '$2y$10$ETXBX5lUiSuQbwRow8TmIOC.nQsVlKZcaEWaKd7L/aE4Zyv3MuGga', 'student', 'active', 0, '2026-02-24 13:15:39', '2026-02-22 01:59:46', '2026-02-24 05:15:39'),
-(13, 'Denise Alia Sernande', 'daasernande@dihs.edu.com', '$2y$10$XHCin38joCIgbiPHY1MeXuXgePpXCglja0EBfOuN01CWCsFwbnq7G', 'faculty', 'active', 1, NULL, '2026-02-23 12:48:26', '2026-02-24 01:34:40'),
-(17, 'Charles Arias', 'ariascharles00@gmail.com', '$2y$10$sEovspLDwc7zCvzoVTwWpeYWAX/iZjX89peOJPKXIWTbO.1dPVxw2', 'super_admin', 'active', 0, '2026-02-24 13:15:58', '2026-02-24 02:39:34', '2026-02-24 05:15:58');
+(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$jZmCybtGmbJ3f0nnDC2/ouHzx9QXvnYiVEl/tkMRYKqRAWw2.nPbu', 'admin', 'active', 1, '2026-02-28 22:45:08', '2026-01-19 11:51:48', '2026-02-28 14:45:08'),
+(17, 'Charles Arias', 'ariascharles00@gmail.com', '$2y$10$sEovspLDwc7zCvzoVTwWpeYWAX/iZjX89peOJPKXIWTbO.1dPVxw2', 'super_admin', 'active', 0, '2026-02-27 19:32:56', '2026-02-24 02:39:34', '2026-02-27 11:32:56'),
+(27, 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '$2y$10$7.TA.OAUTHLS1sQan2LyI.ABDssmTC9IFFW2CAOk1j1k3nBlcztc2', 'student', 'active', 0, '2026-02-28 22:36:08', '2026-02-27 11:15:21', '2026-02-28 14:36:08'),
+(30, 'Gabriel A. Bayas', 'gbayas@dihs.edu.ph', '$2y$10$HT3lp7EQBPeY/nrMHdYdaOVfQehamwrIu3x3FfxnY5Fsg4SHr6iIW', 'faculty', 'active', 1, '2026-02-28 22:16:20', '2026-02-28 08:42:33', '2026-02-28 14:16:20');
 
 -- --------------------------------------------------------
 
@@ -493,8 +584,8 @@ CREATE TABLE `user_settings` (
 --
 
 INSERT INTO `user_settings` (`id`, `user_id`, `receive_email_reminders`, `notify_period_close`, `profile_visible_to_faculty`, `submit_anonymously`, `theme_preference`, `language_preference`, `created_at`) VALUES
-(9, 12, 1, 1, 1, 1, 'light', 'en', '2026-02-22 01:59:46'),
-(10, 13, 1, 1, 1, 1, 'light', 'en', '2026-02-23 12:48:26');
+(19, 27, 1, 1, 1, 1, 'light', 'en', '2026-02-27 11:15:21'),
+(21, 30, 1, 1, 1, 1, 'light', 'en', '2026-02-28 08:42:33');
 
 --
 -- Indexes for dumped tables
@@ -571,6 +662,13 @@ ALTER TABLE `student_profiles`
   ADD KEY `class_section_id` (`class_section_id`);
 
 --
+-- Indexes for table `subjects`
+--
+ALTER TABLE `subjects`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_subject` (`name`,`grade_level`,`strand`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -592,13 +690,13 @@ ALTER TABLE `user_settings`
 -- AUTO_INCREMENT for table `admin_action_logs`
 --
 ALTER TABLE `admin_action_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `class_sections`
 --
 ALTER TABLE `class_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `courses`
@@ -610,7 +708,7 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `course_offerings`
 --
 ALTER TABLE `course_offerings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=260;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=269;
 
 --
 -- AUTO_INCREMENT for table `departments`
@@ -628,31 +726,37 @@ ALTER TABLE `evaluations`
 -- AUTO_INCREMENT for table `faculty_assignments`
 --
 ALTER TABLE `faculty_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=195;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
 
 --
 -- AUTO_INCREMENT for table `faculty_profiles`
 --
 ALTER TABLE `faculty_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `student_profiles`
 --
 ALTER TABLE `student_profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `subjects`
+--
+ALTER TABLE `subjects`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `user_settings`
 --
 ALTER TABLE `user_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Constraints for dumped tables

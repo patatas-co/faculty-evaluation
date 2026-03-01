@@ -2,11 +2,11 @@
 
 /* ── Teacher-specific accent & tokens ── */
 :root {
-    --teacher-accent:       #3b82f6;
-    --teacher-accent-dark:  #1d4ed8;
-    --teacher-accent-light: rgba(59,130,246,0.10);
-    --teacher-gold:         #f59e0b;
-    --teacher-gold-light:   rgba(245,158,11,0.10);
+    --teacher-accent: #3b82f6;
+    --teacher-accent-dark: #1d4ed8;
+    --teacher-accent-light: rgba(59, 130, 246, 0.10);
+    --teacher-gold: #f59e0b;
+    --teacher-gold-light: rgba(245, 158, 11, 0.10);
 }
 
 /* ── Rating Stars ── */
@@ -44,10 +44,25 @@
     font-weight: 600;
 }
 
-.rating-badge.excellent  { background: rgba(76,175,80,0.12);  color: #2e7d32; }
-.rating-badge.good       { background: rgba(59,130,246,0.12); color: #1d4ed8; }
-.rating-badge.average    { background: rgba(245,158,11,0.12); color: #b45309; }
-.rating-badge.poor       { background: rgba(239,68,68,0.12);  color: #b91c1c; }
+.rating-badge.excellent {
+    background: rgba(76, 175, 80, 0.12);
+    color: #2e7d32;
+}
+
+.rating-badge.good {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+}
+
+.rating-badge.average {
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+}
+
+.rating-badge.poor {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
 
 /* ── Profile Card ── */
 .teacher-profile-card {
@@ -56,7 +71,7 @@
     border-radius: 20px;
     overflow: hidden;
     margin-bottom: 24px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .teacher-profile-banner {
@@ -96,7 +111,7 @@
     font-weight: 700;
     color: #fff;
     border: 4px solid #fff;
-    box-shadow: 0 4px 14px rgba(59,130,246,0.22);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.22);
     flex-shrink: 0;
 }
 
@@ -121,7 +136,9 @@
 }
 
 @media (max-width: 640px) {
-    .profile-form-grid { grid-template-columns: 1fr; }
+    .profile-form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .profile-form-grid .form-group.full-width {
@@ -212,13 +229,13 @@
     transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
-    cursor: pointer;
 }
 
 .section-card::before {
     content: '';
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 4px;
     height: 100%;
     background: var(--teacher-accent);
@@ -227,7 +244,7 @@
 
 .section-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(59,130,246,0.12);
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.12);
 }
 
 .section-card-code {
@@ -290,13 +307,15 @@
     transition: color 0.2s;
 }
 
-.section-card-view-btn:hover { color: var(--teacher-accent-dark); }
+.section-card-view-btn:hover {
+    color: var(--teacher-accent-dark);
+}
 
 /* ── Course Tags ── */
 .course-tag {
     display: inline-block;
     padding: 4px 10px;
-    background: rgba(76,175,80,0.10);
+    background: rgba(76, 175, 80, 0.10);
     color: #2e7d32;
     border-radius: 10px;
     font-size: 0.78rem;
@@ -332,7 +351,9 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
-.student-list-item:last-child { border-bottom: none; }
+.student-list-item:last-child {
+    border-bottom: none;
+}
 
 .student-list-avatar {
     width: 34px;

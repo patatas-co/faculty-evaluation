@@ -94,6 +94,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'download_subjects_template') 
 
 $displayName = $currentUser['full_name'];
 
+// ── Session flash (from POST redirects like edit_teacher) ──
+$actionError   = '';
+$actionSuccess = '';
+if (isset($_SESSION['admin_flash'])) {
+    $actionSuccess = $_SESSION['admin_flash']['type'] === 'success' ? $_SESSION['admin_flash']['msg'] : '';
+    $actionError   = $_SESSION['admin_flash']['type'] === 'danger'  ? $_SESSION['admin_flash']['msg'] : '';
+    unset($_SESSION['admin_flash']);
+}
+
 // ── Stats ──
 $totalTeachers  = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='faculty'")->fetchColumn();
 $totalStudents  = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
@@ -105,11 +114,14 @@ $teachersStmt = $pdo->query(
     "SELECT u.id, u.full_name, u.email, u.status,
             fp.employee_id, fp.academic_rank,
             d.name AS department,
-            COUNT(DISTINCT fa.id) AS assignment_count
+            COUNT(DISTINCT fa.id) AS assignment_count,
+            GROUP_CONCAT(DISTINCT co.class_section_id) AS section_ids,
+            GROUP_CONCAT(DISTINCT co.course_id)        AS course_ids
      FROM users u
      LEFT JOIN faculty_profiles fp ON fp.user_id = u.id
      LEFT JOIN departments d ON d.id = fp.department_id
      LEFT JOIN faculty_assignments fa ON fa.faculty_user_id = u.id
+     LEFT JOIN course_offerings co ON co.id = fa.course_offering_id
      WHERE u.role = 'faculty'
      GROUP BY u.id
      ORDER BY u.full_name"
@@ -133,9 +145,6 @@ try {
 } catch (PDOException $e) { $subjects = []; }
 
 // ── Handle POST actions ──
-$actionError   = '';
-$actionSuccess = '';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'edit_teacher') {
@@ -148,8 +157,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ->execute([$rank, $userId]);
 
     // Update assignments — clear existing then re-add
+    // Edit modal sends subject_ids[], Add modal sends course_ids[] — merge both
     $courseIds  = array_map('intval', $_POST['course_ids']  ?? []);
+    $subjectIds = array_map('intval', $_POST['subject_ids'] ?? []);
+    $allIds     = array_unique(array_merge($courseIds, $subjectIds));
     $sectionIds = array_map('intval', $_POST['section_ids'] ?? []);
+
+    // Resolve each ID: if it exists in courses table use it directly;
+    // if it only exists in subjects table, auto-insert it into courses first
+    // to satisfy the course_offerings.course_id FK constraint.
+    $resolvedCourseIds = [];
+    foreach ($allIds as $id) {
+        if (!$id) continue;
+        // Check if already a valid courses row
+        $exists = $pdo->prepare("SELECT id FROM courses WHERE id = ? LIMIT 1");
+        $exists->execute([$id]);
+        if ($exists->fetchColumn()) {
+            $resolvedCourseIds[] = $id;
+            continue;
+        }
+        // Not in courses — look it up in subjects and auto-create a courses row
+        $subj = $pdo->prepare("SELECT name, description FROM subjects WHERE id = ? LIMIT 1");
+        $subj->execute([$id]);
+        $subjRow = $subj->fetch(PDO::FETCH_ASSOC);
+        if ($subjRow) {
+            // Generate a safe code from the subject name
+            $code = strtoupper(preg_replace('/[^A-Za-z0-9]/', '-', $subjRow['name']));
+            // Insert into courses (ignore if somehow already exists by name/code)
+            $ins = $pdo->prepare(
+                "INSERT INTO courses (name, code, description) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)"
+            );
+            $ins->execute([$subjRow['name'], $code, $subjRow['description'] ?? '']);
+            $resolvedCourseIds[] = (int)$pdo->lastInsertId();
+        }
+    }
+    $resolvedCourseIds = array_unique(array_filter($resolvedCourseIds));
 
     // Delete old assignments
     $pdo->prepare("DELETE fa FROM faculty_assignments fa
@@ -157,10 +200,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    WHERE fa.faculty_user_id = ?")->execute([$userId]);
 
     // Add new assignments
-    if ($courseIds && $sectionIds) {
+    if ($resolvedCourseIds && $sectionIds) {
         $coStmt = $pdo->prepare("SELECT id FROM course_offerings WHERE course_id=? AND class_section_id=? AND is_active=1 LIMIT 1");
         $faStmt = $pdo->prepare("INSERT IGNORE INTO faculty_assignments (faculty_user_id, course_offering_id) VALUES (?,?)");
-        foreach ($courseIds as $cid) {
+        foreach ($resolvedCourseIds as $cid) {
             foreach ($sectionIds as $sid) {
                 $coStmt->execute([$cid, $sid]);
                 $co = $coStmt->fetchColumn();
@@ -179,7 +222,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ->execute([password_hash($password, PASSWORD_BCRYPT), $userId]);
     }
 
-    $actionSuccess = 'Teacher updated successfully.';
+    // Re-fetch updated teachers list so all dashboards reflect the change
+    $teachers = $pdo->query(
+        "SELECT u.id, u.full_name, u.email, u.status,
+                fp.employee_id, fp.academic_rank,
+                d.name AS department,
+                COUNT(DISTINCT fa.id) AS assignment_count,
+                GROUP_CONCAT(DISTINCT co.class_section_id) AS section_ids,
+                GROUP_CONCAT(DISTINCT co.course_id)        AS course_ids
+         FROM users u
+         LEFT JOIN faculty_profiles fp ON fp.user_id = u.id
+         LEFT JOIN departments d ON d.id = fp.department_id
+         LEFT JOIN faculty_assignments fa ON fa.faculty_user_id = u.id
+         LEFT JOIN course_offerings co ON co.id = fa.course_offering_id
+         WHERE u.role = 'faculty'
+         GROUP BY u.id ORDER BY u.full_name"
+    )->fetchAll(PDO::FETCH_ASSOC);
+
+    $_SESSION['admin_flash'] = ['type' => 'success', 'msg' => 'Teacher assignment updated successfully.'];
+    header('Location: admin-dashboard.php?tab=teachers');
+    exit;
 }
     // Add teacher
     if ($action === 'add_teacher') {
@@ -211,21 +273,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("INSERT INTO faculty_profiles (user_id, department_id, employee_id, academic_rank, status) VALUES (?,?,?,?,'Active')");
                 $stmt->execute([$newUserId, $deptId ?: null, $employeeId, $academicRank]);
 
-                // Assign courses to sections
+                // Assign courses/subjects to sections (FK-safe)
                 if ($courseIds && $sectionIds) {
+                    // Resolve subject IDs → valid courses.id, auto-inserting if needed
+                    $resolvedIds = [];
+                    foreach ($courseIds as $id) {
+                        if (!$id) continue;
+                        $ex = $pdo->prepare("SELECT id FROM courses WHERE id = ? LIMIT 1");
+                        $ex->execute([$id]);
+                        if ($ex->fetchColumn()) { $resolvedIds[] = $id; continue; }
+                        $subj = $pdo->prepare("SELECT name, description FROM subjects WHERE id = ? LIMIT 1");
+                        $subj->execute([$id]);
+                        $subjRow = $subj->fetch(PDO::FETCH_ASSOC);
+                        if ($subjRow) {
+                            $code = strtoupper(preg_replace('/[^A-Za-z0-9]/', '-', $subjRow['name']));
+                            $ins = $pdo->prepare("INSERT INTO courses (name, code, description) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)");
+                            $ins->execute([$subjRow['name'], $code, $subjRow['description'] ?? '']);
+                            $resolvedIds[] = (int)$pdo->lastInsertId();
+                        }
+                    }
+                    $resolvedIds = array_unique(array_filter($resolvedIds));
                     $coStmt  = $pdo->prepare("SELECT id FROM course_offerings WHERE course_id=? AND class_section_id=? AND is_active=1 LIMIT 1");
                     $faStmt  = $pdo->prepare("INSERT IGNORE INTO faculty_assignments (faculty_user_id, course_offering_id) VALUES (?,?)");
-                    foreach ($courseIds as $cid) {
+                    foreach ($resolvedIds as $cid) {
                         foreach ($sectionIds as $sid) {
                             $coStmt->execute([$cid, $sid]);
-$co = $coStmt->fetchColumn();
-if (!$co) {
-    // No course_offering exists yet — create one automatically
-    $pdo->prepare("INSERT INTO course_offerings (course_id, class_section_id, is_active, academic_year) VALUES (?,?,1,'2024-2025')")
-        ->execute([$cid, $sid]);
-    $co = (int)$pdo->lastInsertId();
-}
-if ($co) $faStmt->execute([$newUserId, $co]);
+                            $co = $coStmt->fetchColumn();
+                            if (!$co) {
+                                $pdo->prepare("INSERT INTO course_offerings (course_id, class_section_id, is_active, academic_year) VALUES (?,?,1,'2024-2025')")
+                                    ->execute([$cid, $sid]);
+                                $co = (int)$pdo->lastInsertId();
+                            }
+                            if ($co) $faStmt->execute([$newUserId, $co]);
                         }
                     }
                 }
