@@ -746,8 +746,8 @@ if (!$encoded) $encoded = '{}';
     <link rel="icon" href="favicon/android-chrome-512x512.png" sizes="512x512" type="image/png">
     <link rel="manifest" href="favicon/site.webmanifest">
     <title>Admin Dashboard | Professor Evaluation</title>
-    <link rel="stylesheet" href="student-dashboard.css"/>
-    <link rel="stylesheet" href="admin-dashboard.css"/>
+    <link rel="stylesheet" href="css/student-dashboard.css"/>
+    <link rel="stylesheet" href="css/admin-dashboard.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <script>
     (function() {
@@ -1197,6 +1197,6 @@ if (!$encoded) $encoded = '{}';
 </div>
 
 <script>window.__APP_DATA__ = <?= $encoded ?>;</script>
-<script src="admin-dashboard.js"></script>
+<script src="js/admin-dashboard.js"></script>
 </body>
 </html>

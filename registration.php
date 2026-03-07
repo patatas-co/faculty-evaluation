@@ -1221,7 +1221,7 @@ if ($selectedGradeFilter === '' && !empty($formData['classSection'])) {
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="js/app.js"></script>
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {

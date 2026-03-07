@@ -206,8 +206,8 @@ $currentId  = (int)$currentUser['id'];
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon/favicon.ico" type="image/x-icon">
 <title>Manage Admins | Admin Panel</title>
-<link rel="stylesheet" href="student-dashboard.css"/>
-<link rel="stylesheet" href="admin-dashboard.css"/>
+<link rel="stylesheet" href="css/student-dashboard.css"/>
+<link rel="stylesheet" href="css/admin-dashboard.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 .ma-wrap { max-width: 100%; }

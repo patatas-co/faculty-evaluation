@@ -252,7 +252,7 @@ if ($encodedAppData === false) {
     <link rel="icon" href="favicon/android-chrome-512x512.png" sizes="512x512" type="image/png">
     <link rel="manifest" href="favicon/site.webmanifest">
     <title>Student Dashboard | Professor Evaluation</title>
-    <link rel="stylesheet" href="student-dashboard.css" />
+    <link rel="stylesheet" href="css/student-dashboard.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -329,6 +329,6 @@ if ($encodedAppData === false) {
     <script>
         window.__APP_DATA__ = <?= $encodedAppData ?>;
     </script>
-    <script src="student-dashboard.js"></script>
+    <script src="js/student-dashboard.js"></script>
 </body>
 </html>

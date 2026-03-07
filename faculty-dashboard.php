@@ -211,9 +211,9 @@ $encoded = json_encode($appData, JSON_HEX_TAG | JSON_HEX_AMP);
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Teacher Dashboard | Professor Evaluation</title>
-    <link rel="stylesheet" href="student-dashboard.css"/>
-    <link rel="stylesheet" href="admin-dashboard.css"/>
-    <link rel="stylesheet" href="faculty-dashboard.css"/>
+    <link rel="stylesheet" href="css/student-dashboard.css"/>
+    <link rel="stylesheet" href="css/admin-dashboard.css"/>
+    <link rel="stylesheet" href="css/faculty-dashboard.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <script>
     (function() {
@@ -300,6 +300,6 @@ $encoded = json_encode($appData, JSON_HEX_TAG | JSON_HEX_AMP);
 </div>
 
 <script>window.__APP_DATA__ = <?= $encoded ?>;</script>
-<script src="faculty-dashboard.js"></script>
+<script src="js/faculty-dashboard.js"></script>
 </body>
 </html>

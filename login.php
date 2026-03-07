@@ -868,7 +868,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="js/app.js"></script>
 
     <div class="modal" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title" aria-hidden="true">
         <div class="modal__dialog" role="document">

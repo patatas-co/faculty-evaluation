@@ -10,7 +10,7 @@
     <link rel="manifest" href="favicon/site.webmanifest">
     <title>Dasmarinas Interated High School Faculty Evaluation</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
     <header>
@@ -317,6 +317,6 @@
         </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
