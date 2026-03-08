@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-session_start();
-
 // Prevent browser from caching stale assignment/faculty data
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
@@ -15,7 +13,18 @@ require_login();
 
 $pdo = get_pdo();
 $currentUser = current_user($pdo);
-$displayName = $currentUser ? $currentUser['full_name'] : 'Student';
+
+if (!$currentUser || $currentUser['role'] !== 'student') {
+    header('Location: login.php');
+    exit;
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+
+$displayName = $currentUser['full_name'];
 
 $studentProfileData = [
     'name' => $displayName,
@@ -124,6 +133,7 @@ if ($currentUser) {
 
                 $courseMap[$courseId]['professors'][] = [
                     'id' => (int)$row['assignment_id'],
+                    'faculty_assignment_id' => (int)$row['assignment_id'],
                     'name' => $row['faculty_name'],
                     'department' => $row['department_name'],
                     'courses' => [$row['course_name']],
@@ -196,6 +206,7 @@ if ($currentUser) {
 
                     $courseMap[$courseId]['professors'][] = [
                         'id' => (int)$row['assignment_id'],
+                        'faculty_assignment_id' => (int)$row['assignment_id'],
                         'name' => $row['faculty_name'],
                         'department' => $row['department_name'],
                         'courses' => [$row['course_name']],
@@ -220,9 +231,10 @@ if ($currentUser) {
 }
 
 $appData = [
-    'studentProfile' => $studentProfileData,
+    'studentProfile'    => $studentProfileData,
     'evaluationCourses' => $evaluationCourses,
-    'userSettings' => $userSettingsData,
+    'userSettings'      => $userSettingsData,
+    'csrfToken'         => $_SESSION['csrf_token'],
 ];
 
 $encodedAppData = json_encode(
@@ -251,6 +263,7 @@ if ($encodedAppData === false) {
     <link rel="icon" href="favicon/android-chrome-192x192.png" sizes="192x192" type="image/png">
     <link rel="icon" href="favicon/android-chrome-512x512.png" sizes="512x512" type="image/png">
     <link rel="manifest" href="favicon/site.webmanifest">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
     <title>Student Dashboard | Professor Evaluation</title>
     <link rel="stylesheet" href="css/student-dashboard.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -274,7 +287,7 @@ if ($encodedAppData === false) {
         
         <div class="logo">
             <img src="favicon/android-chrome-192x192.png" alt="Professor Evaluation" />
-            <span>Professor <br>Evaluation</br> </span>
+            <span>Professor<br>Evaluation</span>
         </div>
         
         <nav class="nav-menu">
@@ -324,11 +337,12 @@ if ($encodedAppData === false) {
             <div class="loading">Loading module...</div>
         </section>
     </main>
-
+    
     <!-- Load external JS at the end -->
     <script>
         window.__APP_DATA__ = <?= $encodedAppData ?>;
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="js/student-dashboard.js"></script>
 </body>
 </html>

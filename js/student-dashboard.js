@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const seedData = window.__APP_DATA__ || {};
+    const csrfToken = seedData.csrfToken || '';
 
     const studentProfile = {
         name: seedData.studentProfile?.name || 'Student',
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'engagement', text: 'Encourages student participation and engagement.' },
         { id: 'support', text: 'Offers support and guidance when needed.' }
     ];
-    
+
 
     let evaluationState = null;
     let evaluationUI = null;
@@ -128,27 +129,27 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTooltipState();
 
     function renderProfileModule() {
-    evaluationState = null;
-    evaluationUI = null;
+        evaluationState = null;
+        evaluationUI = null;
 
-    const studentNumberDisplay = formatProfileValue(studentProfile.studentNumber);
-    const courseNumberDisplay = formatProfileValue(studentProfile.courseNumber);
-    const emailDisplay = formatProfileValue(studentProfile.email);
-    const courseProgramDisplay = formatProfileValue(studentProfile.courseProgram);
-    const yearLevelDisplay = typeof studentProfile.yearLevel === 'number'
-        ? `Year ${studentProfile.yearLevel}`
-        : formatProfileValue('');
-    const classSectionDisplay = studentProfile.classSection?.code
-        ? `${studentProfile.classSection.code}`
-        : formatProfileValue('');
+        const studentNumberDisplay = formatProfileValue(studentProfile.studentNumber);
+        const courseNumberDisplay = formatProfileValue(studentProfile.courseNumber);
+        const emailDisplay = formatProfileValue(studentProfile.email);
+        const courseProgramDisplay = formatProfileValue(studentProfile.courseProgram);
+        const yearLevelDisplay = typeof studentProfile.yearLevel === 'number'
+            ? `Year ${studentProfile.yearLevel}`
+            : formatProfileValue('');
+        const classSectionDisplay = studentProfile.classSection?.code
+            ? `${studentProfile.classSection.code}`
+            : formatProfileValue('');
 
-    // Hide Course Number for Grade 7-10 (Junior High School)
-    const showCourseNumber = !(studentProfile.yearLevel >= 7 && studentProfile.yearLevel <= 10);
-    
-    // Show Program field for Grade 9-12 only
-    const showProgram = studentProfile.yearLevel >= 9 && studentProfile.yearLevel <= 12;
+        // Hide Course Number for Grade 7-10 (Junior High School)
+        const showCourseNumber = !(studentProfile.yearLevel >= 7 && studentProfile.yearLevel <= 10);
 
-    content.innerHTML = `
+        // Show Program field for Grade 9-12 only
+        const showProgram = studentProfile.yearLevel >= 9 && studentProfile.yearLevel <= 12;
+
+        content.innerHTML = `
         <section class="profile-summary">
             <article class="module-card profile-card profile-card--highlight">
                 <div class="profile-card-header">
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </article>
         </section>
     `;
-}
+    }
 
     function renderSettingsModule() {
         evaluationState = null;
@@ -236,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 feedback.textContent = 'Settings saved successfully!';
                 feedback.classList.remove('form-feedback--error');
-                
+
                 setTimeout(() => {
                     feedback.textContent = '';
                 }, 3000);
@@ -249,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Reset all form elements
                     const checkboxes = content.querySelectorAll('input[type="checkbox"]');
                     const selects = content.querySelectorAll('select');
-                    
+
                     checkboxes.forEach(checkbox => {
                         switch (checkbox.id) {
                             case 'email-notifications':
@@ -268,17 +269,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                 checkbox.checked = false;
                         }
                     });
-                    
+
                     selects.forEach(select => {
                         if (select.id === 'theme') select.value = defaultSettings.themePreference;
                         if (select.id === 'language') select.value = defaultSettings.languagePreference;
                     });
-                    
+
                     Object.assign(userSettings, defaultSettings);
 
                     feedback.textContent = 'Settings reset to defaults';
                     feedback.classList.remove('form-feedback--error');
-                    
+
                     setTimeout(() => {
                         feedback.textContent = '';
                     }, 3000);
@@ -322,47 +323,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getEvaluableProfessors(course, studentCourseNumber) {
-    if (!course || !Array.isArray(course.professors)) {
-        return [];
-    }
-    
-    return course.professors.filter(professor => {
-        return professor.accessible === true;
-    });
-}
+        if (!course || !Array.isArray(course.professors)) {
+            return [];
+        }
 
-// Junior High School allowed courses (Grades 7-10)
-const JUNIOR_HIGH_COURSES = [
-    'Filipino',
-    'English',
-    'Mathematics',
-    'Science',
-    'Araling Panlipunan',
-    'MAPEH',
-    'Music, Art, Physical Education, and Health',
-    'Technology and Livelihood Education',
-    'TLE',
-    'Values Education'
-];
-
-function getFilteredCoursesByYearLevel(courses, yearLevel) {
-    if (!yearLevel) {
-        return courses;
-    }
-    
-    // For Junior High School (Grades 7-10), filter to allowed subjects only
-    if (yearLevel >= 7 && yearLevel <= 10) {
-        return courses.filter(course => {
-            return JUNIOR_HIGH_COURSES.some(allowedCourse => {
-                return course.name.toLowerCase().includes(allowedCourse.toLowerCase()) ||
-                       allowedCourse.toLowerCase().includes(course.name.toLowerCase());
-            });
+        return course.professors.filter(professor => {
+            return professor.accessible === true;
         });
     }
-    
-    // For Senior High School (Grades 11-12), show all courses
-    return courses;
-}
+
+    // Junior High School allowed courses (Grades 7-10)
+    const JUNIOR_HIGH_COURSES = [
+        'Filipino',
+        'English',
+        'Mathematics',
+        'Science',
+        'Araling Panlipunan',
+        'MAPEH',
+        'Music, Art, Physical Education, and Health',
+        'Technology and Livelihood Education',
+        'TLE',
+        'Values Education'
+    ];
+
+    function getFilteredCoursesByYearLevel(courses, yearLevel) {
+        if (!yearLevel) {
+            return courses;
+        }
+
+        // For Junior High School (Grades 7-10), filter to allowed subjects only
+        if (yearLevel >= 7 && yearLevel <= 10) {
+            return courses.filter(course => {
+                return JUNIOR_HIGH_COURSES.some(allowedCourse => {
+                    return course.name.toLowerCase().includes(allowedCourse.toLowerCase()) ||
+                        allowedCourse.toLowerCase().includes(course.name.toLowerCase());
+                });
+            });
+        }
+
+        // For Senior High School (Grades 11-12), show all courses
+        return courses;
+    }
 
     function initEvaluateModule() {
         evaluationUI = {
@@ -420,82 +421,82 @@ function getFilteredCoursesByYearLevel(courses, yearLevel) {
     }
 
     // Add this debug code to the beginning of renderCourseSelection function
-// Find this function in student-dashboard.js and add these logs at the start
+    // Find this function in student-dashboard.js and add these logs at the start
 
-// Replace your renderCourseSelection function with this corrected version
+    // Replace your renderCourseSelection function with this corrected version
 
-// Replace your renderCourseSelection function with this corrected version
+    // Replace your renderCourseSelection function with this corrected version
 
-function renderCourseSelection() {
-    console.log('\n=== RENDER COURSE SELECTION ===');
-    console.log('evaluationUI:', evaluationUI);
-    console.log('evaluationCourses:', evaluationCourses);
-    console.log('evaluationCourses.length:', evaluationCourses.length);
-    console.log('studentProfile.courseNumber:', studentProfile.courseNumber);
-    
-    const { breadcrumb, helperText, contentContainer, backButton } = evaluationUI;
-    updateBreadcrumb(['Courses']);
-    backButton.hidden = true;
+    function renderCourseSelection() {
+        console.log('\n=== RENDER COURSE SELECTION ===');
+        console.log('evaluationUI:', evaluationUI);
+        console.log('evaluationCourses:', evaluationCourses);
+        console.log('evaluationCourses.length:', evaluationCourses.length);
+        console.log('studentProfile.courseNumber:', studentProfile.courseNumber);
 
-    // CHECK 1: Do we have any courses at all?
-    if (!evaluationCourses.length) {
-        console.log('NO COURSES - showing empty message');
-        helperText.textContent = 'No courses have been configured yet.';
-        contentContainer.innerHTML = `
+        const { breadcrumb, helperText, contentContainer, backButton } = evaluationUI;
+        updateBreadcrumb(['Courses']);
+        backButton.hidden = true;
+
+        // CHECK 1: Do we have any courses at all?
+        if (!evaluationCourses.length) {
+            console.log('NO COURSES - showing empty message');
+            helperText.textContent = 'No courses have been configured yet.';
+            contentContainer.innerHTML = `
             <div class="module-card evaluation-empty">
                 <h3>No courses available</h3>
                 <p>Once courses are assigned, they will appear here for evaluation.</p>
             </div>`;
-        return;
-    }
+            return;
+        }
 
-    // CHECK 2: Does student have a course number?
-    if (!studentProfile.courseNumber) {
-        console.log('NO COURSE NUMBER - showing error message');
-        helperText.textContent = 'Your course number is missing. Please contact the registrar to update your profile before submitting evaluations.';
-        contentContainer.innerHTML = `
+        // CHECK 2: Does student have a course number?
+        if (!studentProfile.courseNumber) {
+            console.log('NO COURSE NUMBER - showing error message');
+            helperText.textContent = 'Your course number is missing. Please contact the registrar to update your profile before submitting evaluations.';
+            contentContainer.innerHTML = `
             <div class="module-card evaluation-empty">
                 <h3>Course number required</h3>
                 <p>We cannot determine which professors you can evaluate without your course number.</p>
             </div>`;
-        return;
-    }
+            return;
+        }
 
-    // FILTER: Apply year level filter
-    console.log('Student year level:', studentProfile.yearLevel);
-    const filteredCourses = getFilteredCoursesByYearLevel(evaluationCourses, studentProfile.yearLevel);
-    console.log('Filtered courses count:', filteredCourses.length);
-    console.log('Filtered courses:', filteredCourses);
-    
-    // CHECK 3: Do we have courses after filtering?
-    if (!filteredCourses.length) {
-        console.log('NO FILTERED COURSES - showing grade level message');
-        helperText.textContent = `No courses available for your grade level (Grade ${studentProfile.yearLevel}).`;
-        contentContainer.innerHTML = `
+        // FILTER: Apply year level filter
+        console.log('Student year level:', studentProfile.yearLevel);
+        const filteredCourses = getFilteredCoursesByYearLevel(evaluationCourses, studentProfile.yearLevel);
+        console.log('Filtered courses count:', filteredCourses.length);
+        console.log('Filtered courses:', filteredCourses);
+
+        // CHECK 3: Do we have courses after filtering?
+        if (!filteredCourses.length) {
+            console.log('NO FILTERED COURSES - showing grade level message');
+            helperText.textContent = `No courses available for your grade level (Grade ${studentProfile.yearLevel}).`;
+            contentContainer.innerHTML = `
             <div class="module-card evaluation-empty">
                 <h3>No courses available</h3>
                 <p>Courses for Grade ${studentProfile.yearLevel} will appear here once they are configured.</p>
             </div>`;
-        return;
-    }
+            return;
+        }
 
-    // RENDER: Display courses
-    console.log('RENDERING COURSES - creating course cards');
-    helperText.textContent = `Select a course to evaluate professors assigned to ${studentProfile.courseNumber}.`;
+        // RENDER: Display courses
+        console.log('RENDERING COURSES - creating course cards');
+        helperText.textContent = `Select a course to evaluate professors assigned to ${studentProfile.courseNumber}.`;
 
-    const courseCards = filteredCourses.map((course, index) => {
-        console.log(`\nProcessing course ${index}:`, course.name, 'ID:', course.id);
-        const accessibleProfessors = getEvaluableProfessors(course, studentProfile.courseNumber);
-        const accessibleCount = accessibleProfessors.length;
-        const totalProfessors = course.professors.length;
-        
-        console.log(`  Total professors: ${totalProfessors}`);
-        console.log(`  Accessible professors: ${accessibleCount}`);
-        
-        const badgeClass = accessibleCount ? 'evaluation-badge is-available' : 'evaluation-badge is-locked';
-        const badgeLabel = accessibleCount ? `${accessibleCount} available to you` : 'No access';
+        const courseCards = filteredCourses.map((course, index) => {
+            console.log(`\nProcessing course ${index}:`, course.name, 'ID:', course.id);
+            const accessibleProfessors = getEvaluableProfessors(course, studentProfile.courseNumber);
+            const accessibleCount = accessibleProfessors.length;
+            const totalProfessors = course.professors.length;
 
-        return `
+            console.log(`  Total professors: ${totalProfessors}`);
+            console.log(`  Accessible professors: ${accessibleCount}`);
+
+            const badgeClass = accessibleCount ? 'evaluation-badge is-available' : 'evaluation-badge is-locked';
+            const badgeLabel = accessibleCount ? `${accessibleCount} available to you` : 'No access';
+
+            return `
             <article class="module-card evaluation-card" data-course-id="${course.id}">
                 <div class="evaluation-card-body">
                     <div>
@@ -507,75 +508,75 @@ function renderCourseSelection() {
                 </div>
             </article>
         `;
-    }).join('');
+        }).join('');
 
-    console.log('Total courseCards HTML length:', courseCards.length);
-    console.log('Setting innerHTML...');
-    contentContainer.innerHTML = `<div class="evaluation-grid">${courseCards}</div>`;
-    console.log('HTML set. Now attaching click handlers...');
+        console.log('Total courseCards HTML length:', courseCards.length);
+        console.log('Setting innerHTML...');
+        contentContainer.innerHTML = `<div class="evaluation-grid">${courseCards}</div>`;
+        console.log('HTML set. Now attaching click handlers...');
 
-    // IMPORTANT: Attach click handlers AFTER the HTML is inserted
-    const buttons = contentContainer.querySelectorAll('.select-course');
-    console.log('Found buttons:', buttons.length);
-    
-    buttons.forEach((button, index) => {
-        console.log(`Attaching handler to button ${index}, courseId:`, button.dataset.courseId);
-        
-        button.addEventListener('click', function(event) {
-            console.log('Button clicked!', event);
-            
-            if (button.disabled) {
-                console.log('Button is disabled, ignoring click');
-                return;
-            }
-            
-            const courseId = Number(button.dataset.courseId);
-            console.log('Processing click for course ID:', courseId);
-            
-            evaluationState.level = 'professors';
-            evaluationState.selectedCourseId = courseId;
-            evaluationState.selectedProfessorId = null;
-            
-            console.log('Updated evaluationState:', evaluationState);
-            console.log('Calling renderEvaluationStep...');
-            
-            renderEvaluationStep();
+        // IMPORTANT: Attach click handlers AFTER the HTML is inserted
+        const buttons = contentContainer.querySelectorAll('.select-course');
+        console.log('Found buttons:', buttons.length);
+
+        buttons.forEach((button, index) => {
+            console.log(`Attaching handler to button ${index}, courseId:`, button.dataset.courseId);
+
+            button.addEventListener('click', function (event) {
+                console.log('Button clicked!', event);
+
+                if (button.disabled) {
+                    console.log('Button is disabled, ignoring click');
+                    return;
+                }
+
+                const courseId = Number(button.dataset.courseId);
+                console.log('Processing click for course ID:', courseId);
+
+                evaluationState.level = 'professors';
+                evaluationState.selectedCourseId = courseId;
+                evaluationState.selectedProfessorId = null;
+
+                console.log('Updated evaluationState:', evaluationState);
+                console.log('Calling renderEvaluationStep...');
+
+                renderEvaluationStep();
+            });
         });
-    });
-    
-    console.log('Course selection render complete!');
-}
 
-function renderProfessorSelection() {
-    const { helperText, contentContainer, backButton } = evaluationUI;
-    const course = getSelectedCourse();
-
-    if (!course) {
-        evaluationState = createInitialEvaluationState();
-        renderCourseSelection();
-        return;
+        console.log('Course selection render complete!');
     }
 
-    const accessibleProfessors = getEvaluableProfessors(course, studentProfile.courseNumber);
-    const restrictedProfessors = course.professors.filter(prof => !accessibleProfessors.includes(prof));
+    function renderProfessorSelection() {
+        const { helperText, contentContainer, backButton } = evaluationUI;
+        const course = getSelectedCourse();
 
-    const accessibleCount = accessibleProfessors.length;
-    const totalProfessors = course.professors.length;
+        if (!course) {
+            evaluationState = createInitialEvaluationState();
+            renderCourseSelection();
+            return;
+        }
 
-    updateBreadcrumb(['Courses', course.name, `Your Class (${studentProfile.courseNumber})`, 'Professors']);
-    helperText.textContent = accessibleCount
-        ? `Showing professors assigned to ${studentProfile.courseNumber} for ${course.name}.`
-        : `No professors assigned to ${studentProfile.courseNumber} for ${course.name}.`;
-    backButton.hidden = false;
+        const accessibleProfessors = getEvaluableProfessors(course, studentProfile.courseNumber);
+        const restrictedProfessors = course.professors.filter(prof => !accessibleProfessors.includes(prof));
 
-    const summaryCard = `
+        const accessibleCount = accessibleProfessors.length;
+        const totalProfessors = course.professors.length;
+
+        updateBreadcrumb(['Courses', course.name, `Your Class (${studentProfile.courseNumber})`, 'Professors']);
+        helperText.textContent = accessibleCount
+            ? `Showing professors assigned to ${studentProfile.courseNumber} for ${course.name}.`
+            : `No professors assigned to ${studentProfile.courseNumber} for ${course.name}.`;
+        backButton.hidden = false;
+
+        const summaryCard = `
         <div class="module-card evaluation-summary">
             <h3>${course.name}</h3>
             <p class="evaluation-meta">${accessibleCount} of ${totalProfessors} professors available to you</p>
         </div>`;
 
-    const accessibleMarkup = accessibleProfessors.length
-        ? `<div class="evaluation-grid">
+        const accessibleMarkup = accessibleProfessors.length
+            ? `<div class="evaluation-grid">
                 ${accessibleProfessors.map(professor => `
                     <article class="module-card evaluation-card" data-professor-id="${professor.id}">
                         <div class="evaluation-card-body">
@@ -591,12 +592,12 @@ function renderProfessorSelection() {
                     </article>
                 `).join('')}
            </div>`
-        : `<div class="module-card evaluation-empty">
+            : `<div class="module-card evaluation-empty">
                 <p>No professors available for evaluation in this course.</p>
             </div>`;
 
-    const restrictedMarkup = restrictedProfessors.length
-        ? `<div class="module-card evaluation-restricted">
+        const restrictedMarkup = restrictedProfessors.length
+            ? `<div class="module-card evaluation-restricted">
                 <h4>Not accessible for ${studentProfile.courseNumber}</h4>
                 <ul class="restricted-list">
                     ${restrictedProfessors.map(prof => `
@@ -607,21 +608,21 @@ function renderProfessorSelection() {
                     `).join('')}
                 </ul>
             </div>`
-        : '';
+            : '';
 
-    contentContainer.innerHTML = summaryCard + accessibleMarkup + restrictedMarkup;
+        contentContainer.innerHTML = summaryCard + accessibleMarkup + restrictedMarkup;
 
-    contentContainer.querySelectorAll('.evaluate-professor').forEach(button => {
-        button.addEventListener('click', () => {
-            const professorId = Number(button.dataset.professorId);
-            const professor = accessibleProfessors.find(prof => prof.id === professorId);
-            if (!professor) return;
-            evaluationState.level = 'form';
-            evaluationState.selectedProfessorId = professorId;
-            renderEvaluationStep();
+        contentContainer.querySelectorAll('.evaluate-professor').forEach(button => {
+            button.addEventListener('click', () => {
+                const professorId = Number(button.dataset.professorId);
+                const professor = accessibleProfessors.find(prof => prof.id === professorId);
+                if (!professor) return;
+                evaluationState.level = 'form';
+                evaluationState.selectedProfessorId = professorId;
+                renderEvaluationStep();
+            });
         });
-    });
-}
+    }
 
     function renderEvaluationForm() {
         const { helperText, contentContainer, backButton } = evaluationUI;
@@ -719,39 +720,99 @@ function renderProfessorSelection() {
         event.preventDefault();
         const form = event.currentTarget;
         const feedback = form.querySelector('.form-feedback');
-        const incompleteStatements = likertStatements.filter(statement => {
-            const groupName = `likert-${statement.id}`;
-            return !form.querySelector(`input[name="${groupName}"]:checked`);
-        });
+        const submitBtn = form.querySelector('[type="submit"]');
 
+        // Validate all likert rows answered
+        const incompleteStatements = likertStatements.filter(statement => {
+            return !form.querySelector(`input[name="likert-${statement.id}"]:checked`);
+        });
         if (incompleteStatements.length) {
             feedback.textContent = 'Please complete all rating statements before submitting.';
             feedback.classList.add('form-feedback--error');
-            const firstIncomplete = form.querySelector(`input[name="likert-${incompleteStatements[0].id}"]`);
-            if (firstIncomplete) firstIncomplete.focus();
+            form.querySelector(`input[name="likert-${incompleteStatements[0].id}"]`).focus();
             return;
         }
 
-        const selectedLikertValues = likertStatements.map(statement => {
-            const groupName = `likert-${statement.id}`;
-            const checkedInput = form.querySelector(`input[name="${groupName}"]:checked`);
-            return checkedInput ? checkedInput.value : null;
-        });
-
-        const uniqueLikertValues = new Set(selectedLikertValues.filter(value => value !== null));
-        if (uniqueLikertValues.size === 1) {
-            feedback.textContent = 'Your ratings are uniform. Please review and provide varied responses where appropriate before submitting.';
+        // Validate not all same rating
+        const selectedValues = likertStatements.map(s =>
+            form.querySelector(`input[name="likert-${s.id}"]:checked`)?.value
+        );
+        if (new Set(selectedValues).size === 1) {
+            feedback.textContent = 'Your ratings are uniform. Please review and provide varied responses.';
             feedback.classList.add('form-feedback--error');
             return;
         }
 
         const course = getSelectedCourse();
         const professor = getSelectedProfessor(course);
-        feedback.textContent = `Evaluation submitted for ${professor ? professor.name : 'selected professor'}. Thank you for your feedback.`;
-        feedback.classList.remove('form-feedback--error');
-        Object.keys(likertGroupState || {}).forEach(key => {
-            likertGroupState[key] = form.querySelector(`input[name="${key}"]:checked`) || null;
-        });
+        if (!professor?.faculty_assignment_id) {
+            feedback.textContent = 'Cannot identify the teacher assignment. Please go back and try again.';
+            feedback.classList.add('form-feedback--error');
+            return;
+        }
+
+        const payload = {
+            faculty_assignment_id: professor.faculty_assignment_id,
+            rating_clarity: parseInt(form.querySelector('input[name="likert-clarity"]:checked').value),
+            rating_feedback: parseInt(form.querySelector('input[name="likert-feedback"]:checked').value),
+            rating_engagement: parseInt(form.querySelector('input[name="likert-engagement"]:checked').value),
+            rating_support: parseInt(form.querySelector('input[name="likert-support"]:checked').value),
+            strengths: form.querySelector('#evaluation-strengths').value.trim(),
+            improvements: form.querySelector('#evaluation-opportunities').value.trim(),
+            csrf_token: csrfToken,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting…';
+
+        fetch('submit-evaluation.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => { throw new Error(text); });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Toastify({
+                        text: 'Evaluation submitted successfully!',
+                        duration: 3500,
+                        gravity: 'top',
+                        position: 'right',
+                        style: {
+                            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                            borderRadius: '8px',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            padding: '12px 20px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        }
+                    }).showToast();
+                    // Go back to course list after short delay
+                    setTimeout(() => {
+                        evaluationState = createInitialEvaluationState();
+                        renderEvaluationStep();
+                    }, 1500);
+                } else {
+                    feedback.textContent = data.message || 'Submission failed. Please try again.';
+                    feedback.classList.add('form-feedback--error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Evaluation';
+                }
+            })
+            .catch((err) => {
+                console.error('Fetch error:', err);
+                feedback.textContent = 'A network error occurred. Please try again.';
+                feedback.classList.add('form-feedback--error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Evaluation';
+            });
     }
 
     function getSelectedCourse() {
@@ -777,22 +838,22 @@ function renderProfessorSelection() {
     }
 
     function getEvaluableProfessorsAlt(course, studentCourseNumber) {
-    if (!course || !Array.isArray(course.professors)) return [];
-    if (!studentCourseNumber) return [];
-    
-    return course.professors.filter(professor => {
-        // Check if professor has assignedCourseNumbers and it includes student's course
-        if (!Array.isArray(professor.assignedCourseNumbers)) {
-            console.warn('Professor missing assignedCourseNumbers:', professor);
-            return false;
-        }
-        
-        const isAccessible = professor.assignedCourseNumbers.includes(studentCourseNumber);
-        console.log(`Professor ${professor.name}: sections=${professor.assignedCourseNumbers}, student=${studentCourseNumber}, accessible=${isAccessible}`);
-        
-        return isAccessible;
-    });
-}
+        if (!course || !Array.isArray(course.professors)) return [];
+        if (!studentCourseNumber) return [];
+
+        return course.professors.filter(professor => {
+            // Check if professor has assignedCourseNumbers and it includes student's course
+            if (!Array.isArray(professor.assignedCourseNumbers)) {
+                console.warn('Professor missing assignedCourseNumbers:', professor);
+                return false;
+            }
+
+            const isAccessible = professor.assignedCourseNumbers.includes(studentCourseNumber);
+            console.log(`Professor ${professor.name}: sections=${professor.assignedCourseNumbers}, student=${studentCourseNumber}, accessible=${isAccessible}`);
+
+            return isAccessible;
+        });
+    }
 
     function formatProfileValue(value) {
         return value ? value : '<span class="profile-missing">Not set</span>';
@@ -840,15 +901,15 @@ function renderProfessorSelection() {
                 <span class="likert-label">${statement.text}</span>
                 <div class="likert-options" role="radiogroup" aria-label="${statement.text}">
                     ${likertOptions.map(option => {
-                        const inputId = `likert-${statement.id}-${option.value}`;
-                        return `
+            const inputId = `likert-${statement.id}-${option.value}`;
+            return `
                             <label class="likert-option" for="${inputId}">
                                 <input type="radio" name="likert-${statement.id}" id="${inputId}" value="${option.value}" />
                                 <span class="likert-value" aria-hidden="true">${option.value}</span>
                                 <span class="sr-only">${option.label}</span>
                             </label>
                         `;
-                    }).join('')}
+        }).join('')}
                 </div>
             </div>
         `).join('');

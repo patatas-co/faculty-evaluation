@@ -177,15 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="form-group">
                             <label for="employee_id">Employee ID</label>
-                            <input type="text" id="employee_id" name="employee_id" value="${esc(profile.employee_id)}" readonly/>
+                            <input type="text" id="employee_id" value="${esc(profile.employee_id)}" readonly/>
                         </div>
                         <div class="form-group">
                             <label for="academic_rank">Academic Rank</label>
-                            <input type="text" id="academic_rank" name="academic_rank" value="${esc(profile.academic_rank)}" readonly/>
+                            <input type="text" id="academic_rank" value="${esc(profile.academic_rank)}" readonly/>
                         </div>
                         <div class="form-group">
                             <label for="department">Department</label>
-                            <input type="text" id="department" name="department" value="${esc(profile.department)}" readonly/>
+                           <input type="text" id="department" value="${esc(profile.department)}" readonly/>
                         </div>
                     </div>
                     <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tbody id="eval-tbody">`;
 
         evalResults.forEach(r => {
-            const pct = Math.min(100, Math.round((parseFloat(r.avg_rating) / 5) * 100));
+            const pct = Math.min(100, Math.round(((parseFloat(r.avg_rating) || 0) / 5) * 100));
             html += `<tr data-search="${esc((r.period_title + ' ' + r.course_name + ' ' + r.course_code + ' ' + r.section_code).toLowerCase())}">
                 <td><span class="eval-period-badge">${esc(r.period_title)}</span></td>
                 <td>

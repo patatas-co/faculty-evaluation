@@ -31,7 +31,8 @@ function get_pdo(): PDO
         $pdo = new PDO($dsn, $username, $password, $options);
     } catch (PDOException $e) {
         http_response_code(500);
-        die('Database connection failed: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES));
+        header('Content-Type: application/json');
+        die(json_encode(['success' => false, 'message' => 'Database connection failed. Please try again later.']));
     }
 
     return $pdo;

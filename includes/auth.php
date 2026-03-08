@@ -32,16 +32,17 @@ function current_user(PDO $pdo): ?array
         return null;
     }
 
-    static $cache = null;
-    if ($cache !== null) {
-        return $cache;
-    }
+    static $cache = [];
+$uid = (int)$_SESSION['user_id'];
+if (isset($cache[$uid])) {
+    return $cache[$uid];
+}
 
-    $stmt = $pdo->prepare('SELECT id, role, email, full_name, status FROM users WHERE id = ? LIMIT 1');
-    $stmt->execute([$_SESSION['user_id']]);
-    $cache = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+$stmt = $pdo->prepare('SELECT id, role, email, full_name, status FROM users WHERE id = ? LIMIT 1');
+$stmt->execute([$uid]);
+$cache[$uid] = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-    return $cache;
+return $cache[$uid];
 }
 
 function redirect(string $location): void

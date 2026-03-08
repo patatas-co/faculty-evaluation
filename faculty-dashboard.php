@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-session_start();
 
 // Prevent browser from caching stale assignment data
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -140,15 +139,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         header('Location: faculty-dashboard.php?tab=profile');
         exit;
     }
-    $pdo->beginTransaction();
     try {
-        $pdo->prepare("UPDATE users SET full_name=?, email=? WHERE id=?")->execute([$newFullName, $newEmail, $userId]);
-        $pdo->commit();
-        $_SESSION['teacher_flash'] = ['type' => 'success', 'msg' => 'Profile updated successfully.'];
-    } catch (\Exception $e) {
-        $pdo->rollBack();
-        $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'An error occurred while saving your profile. Please try again.'];
-    }
+    $pdo->prepare("UPDATE users SET full_name=?, email=? WHERE id=?")->execute([$newFullName, $newEmail, $userId]);
+    $_SESSION['teacher_flash'] = ['type' => 'success', 'msg' => 'Profile updated successfully.'];
+} catch (\Exception $e) {
+    $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'An error occurred while saving your profile. Please try again.'];
+}
 } else {
     $_SESSION['teacher_flash'] = ['type' => 'danger', 'msg' => 'Full name and email are required.'];
 }

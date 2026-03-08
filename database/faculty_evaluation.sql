@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 28, 2026 at 03:53 PM
+-- Generation Time: Mar 08, 2026 at 01:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -102,7 +102,7 @@ INSERT INTO `class_sections` (`id`, `code`, `program`, `year_level`, `adviser_na
 (10, 'GRADE10-RIZAL', 'Grade 10 - Rizal', 10, 'Mr. Antonio Lopez', '2026-01-19 11:51:48'),
 (11, 'GRADE10-BONIFACIO', 'Grade 10 - Bonifacio', 10, 'Ms. Jennifer Castillo', '2026-01-19 11:51:48'),
 (12, 'GRADE10-MABINI', 'Grade 10 - Mabini', 10, 'Mrs. Rosario Santiago', '2026-01-19 11:51:48'),
-(19, 'GRADE7-ABELARDO', 'Grade 7 - Abelardo', 7, 'Mr. Ramon Torres', '2026-01-20 02:44:48'),
+(19, 'GRADE7-ABELARDO', 'Grade 7 - Abelardo', 7, 'Mr. Ramon Torre', '2026-01-20 02:44:48'),
 (20, 'GRADE7-JOVELLANA', 'Grade 7 - Jovellana', 7, 'Ms. Elena Ramos', '2026-01-20 02:44:48'),
 (21, 'GRADE8-RUBY', 'Grade 8 - Ruby', 8, 'Ms. Sofia Diaz', '2026-01-20 02:44:49'),
 (22, 'GRADE8-JADE', 'Grade 8 - Jade', 8, 'Mr. Miguel Santos', '2026-01-20 02:44:49'),
@@ -150,7 +150,12 @@ INSERT INTO `courses` (`id`, `name`, `code`, `description`, `created_at`, `updat
 (18, 'Araling Panlipunan', 'AP-JHS', 'Araling Panlipunan - Social Studies', '2026-01-19 15:44:17', '2026-01-19 15:49:52'),
 (19, 'MAPEH', 'MAPEH-JHS', 'Music, Arts, Physical Education, and Health', '2026-01-19 15:44:17', '2026-01-19 15:49:52'),
 (20, 'Technology and Livelihood Education', 'TLE-JHS', 'TLE for Junior High School', '2026-01-19 15:44:17', '2026-01-19 15:49:52'),
-(21, 'Values Education', 'VE-JHS', 'Values Education for Junior High School', '2026-01-19 15:44:17', '2026-01-19 15:49:52');
+(21, 'Values Education', 'VE-JHS', 'Values Education for Junior High School', '2026-01-19 15:44:17', '2026-01-19 15:49:52'),
+(22, 'Basic Calculus', 'BASIC-CALCULUS', 'STEM Specialization', '2026-03-01 10:25:35', '2026-03-01 10:25:35'),
+(23, 'General Biology 1', 'GENERAL-BIOLOGY-1', 'STEM Specialization', '2026-03-01 10:25:50', '2026-03-01 10:25:50'),
+(26, 'General Mathematics', 'GENERAL-MATHEMATICS', 'STEM Core', '2026-03-01 10:30:13', '2026-03-01 10:30:13'),
+(27, 'Physics 1', 'PHYSICS-1', 'STEM Specialization', '2026-03-01 10:30:13', '2026-03-01 10:30:13'),
+(28, 'Pre-Calculus', 'PRE-CALCULUS', 'STEM Specialization', '2026-03-01 10:30:13', '2026-03-01 10:30:13');
 
 -- --------------------------------------------------------
 
@@ -338,7 +343,12 @@ INSERT INTO `course_offerings` (`id`, `course_id`, `class_section_id`, `is_activ
 (262, 15, 29, 1, NULL, '2024-2025', '2026-02-28 11:08:07'),
 (263, 15, 31, 1, NULL, '2024-2025', '2026-02-28 11:08:07'),
 (264, 15, 35, 1, NULL, '2024-2025', '2026-02-28 11:08:07'),
-(265, 17, 27, 1, NULL, '2024-2025', '2026-02-28 11:10:26');
+(265, 17, 27, 1, NULL, '2024-2025', '2026-02-28 11:10:26'),
+(270, 22, 27, 1, NULL, '2024-2025', '2026-03-01 10:25:35'),
+(271, 23, 27, 1, NULL, '2024-2025', '2026-03-01 10:25:50'),
+(272, 26, 27, 1, NULL, '2024-2025', '2026-03-01 10:30:13'),
+(273, 27, 27, 1, NULL, '2024-2025', '2026-03-01 10:30:13'),
+(274, 28, 27, 1, NULL, '2024-2025', '2026-03-01 10:30:13');
 
 -- --------------------------------------------------------
 
@@ -381,11 +391,20 @@ CREATE TABLE `evaluations` (
   `rating_engagement` tinyint(1) NOT NULL CHECK (`rating_engagement` between 1 and 5),
   `rating_support` tinyint(1) NOT NULL CHECK (`rating_support` between 1 and 5),
   `strengths` text DEFAULT NULL,
+  `improvements` text DEFAULT NULL,
+  `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
   `opportunities` text DEFAULT NULL,
   `is_anonymous` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `evaluations`
+--
+
+INSERT INTO `evaluations` (`id`, `faculty_assignment_id`, `student_user_id`, `rating_clarity`, `rating_feedback`, `rating_engagement`, `rating_support`, `strengths`, `improvements`, `submitted_at`, `opportunities`, `is_anonymous`, `created_at`, `updated_at`) VALUES
+(1, 217, 27, 4, 4, 3, 5, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus tincidunt odio nec luctus feugiat. In at interdum lorem. Pellentesque sed venenatis enim. Morbi sollicitudin maximus augue in interdum. Integer at dui elementum nisi congue sollicitudin eu quis turpis. Sed ut sem luctus tortor consectetur egestas at a lacus. Sed in sem ultricies, tincidunt odio a, mattis libero. Aliquam ullamcorper, metus non viverra sollicitudin, eros sapien fringilla sem, et faucibus ligula est eget erat. Vivamus posuere nulla in tortor condimentum, id suscipit ex elementum. Vestibulum enim risus, tempor eu est vitae, mattis posuere arcu. Nam commodo ultricies tempus.', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus tincidunt odio nec luctus feugiat. In at interdum lorem. Pellentesque sed venenatis enim. Morbi sollicitudin maximus augue in interdum. Integer at dui elementum nisi congue sollicitudin eu quis turpis. Sed ut sem luctus tortor consectetur egestas at a lacus. Sed in sem ultricies, tincidunt odio a, mattis libero. Aliquam ullamcorper, metus non viverra sollicitudin, eros sapien fringilla sem, et faucibus ligula est eget erat. Vivamus posuere nulla in tortor condimentum, id suscipit ex elementum. Vestibulum enim risus, tempor eu est vitae, mattis posuere arcu. Nam commodo ultricies tempus.', '2026-03-08 20:19:54', NULL, 0, '2026-03-08 12:19:54', '2026-03-08 12:19:54');
 
 -- --------------------------------------------------------
 
@@ -405,7 +424,7 @@ CREATE TABLE `faculty_assignments` (
 --
 
 INSERT INTO `faculty_assignments` (`id`, `faculty_user_id`, `course_offering_id`, `created_at`) VALUES
-(209, 30, 260, '2026-02-28 11:10:58');
+(217, 30, 270, '2026-03-01 10:30:41');
 
 -- --------------------------------------------------------
 
@@ -471,66 +490,67 @@ CREATE TABLE `subjects` (
   `description` varchar(255) DEFAULT NULL,
   `grade_level` tinyint(4) NOT NULL COMMENT '7 to 12',
   `strand` varchar(50) DEFAULT NULL COMMENT 'STEM, ABM, TVL, HUMSS — only for Grade 11-12',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `course_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `subjects`
 --
 
-INSERT INTO `subjects` (`id`, `name`, `description`, `grade_level`, `strand`, `created_at`) VALUES
-(1, 'English', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(2, 'Mathematics', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(3, 'Science', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(4, 'Filipino', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(5, 'Araling Panlipunan', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(6, 'MAPEH', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(7, 'TLE', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(8, 'Values Education', NULL, 7, NULL, '2026-02-26 14:12:54'),
-(9, 'English', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(10, 'Mathematics', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(11, 'Science', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(12, 'Filipino', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(13, 'Araling Panlipunan', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(14, 'MAPEH', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(15, 'TLE', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(16, 'Values Education', NULL, 8, NULL, '2026-02-26 14:12:54'),
-(17, 'English', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(18, 'Mathematics', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(19, 'Science', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(20, 'Filipino', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(21, 'Araling Panlipunan', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(22, 'MAPEH', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(23, 'TLE', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(24, 'Values Education', NULL, 9, NULL, '2026-02-26 14:12:54'),
-(25, 'English', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(26, 'Mathematics', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(27, 'Science', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(28, 'Filipino', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(29, 'Araling Panlipunan', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(30, 'MAPEH', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(31, 'TLE', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(32, 'Values Education', NULL, 10, NULL, '2026-02-26 14:12:54'),
-(62, 'Basic Calculus', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
-(63, 'General Biology 1', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
-(64, 'General Mathematics', 'STEM Core', 11, 'STEM', '2026-02-28 14:43:56'),
-(65, 'Physics 1', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
-(66, 'Pre-Calculus', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56'),
-(67, 'Business Mathematics', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56'),
-(68, 'Fundamentals of Accountancy', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56'),
-(69, 'Organization & Management', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56'),
-(70, 'Empowerment Technology', 'TVL Applied Subject', 11, 'TVL', '2026-02-28 14:43:56'),
-(71, 'TVL-ICT', 'TVL Specialization', 11, 'TVL', '2026-02-28 14:43:56'),
-(72, 'Basic Calculus', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
-(73, 'General Biology 2', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
-(74, 'General Mathematics', 'STEM Core', 12, 'STEM', '2026-02-28 14:44:32'),
-(75, 'Physics 2', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
-(76, 'Pre-Calculus', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32'),
-(77, 'Business Mathematics', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32'),
-(78, 'Fundamentals of Accountancy', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32'),
-(79, 'Organization & Management', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32'),
-(80, 'Empowerment Technology', 'TVL Applied Subject', 12, 'TVL', '2026-02-28 14:44:32'),
-(81, 'TVL-ICT', 'TVL Specialization', 12, 'TVL', '2026-02-28 14:44:32');
+INSERT INTO `subjects` (`id`, `name`, `description`, `grade_level`, `strand`, `created_at`, `course_id`) VALUES
+(1, 'English', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(2, 'Mathematics', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(3, 'Science', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(4, 'Filipino', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(5, 'Araling Panlipunan', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(6, 'MAPEH', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(7, 'TLE', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(8, 'Values Education', NULL, 7, NULL, '2026-02-26 14:12:54', NULL),
+(9, 'English', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(10, 'Mathematics', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(11, 'Science', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(12, 'Filipino', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(13, 'Araling Panlipunan', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(14, 'MAPEH', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(15, 'TLE', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(16, 'Values Education', NULL, 8, NULL, '2026-02-26 14:12:54', NULL),
+(17, 'English', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(18, 'Mathematics', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(19, 'Science', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(20, 'Filipino', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(21, 'Araling Panlipunan', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(22, 'MAPEH', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(23, 'TLE', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(24, 'Values Education', NULL, 9, NULL, '2026-02-26 14:12:54', NULL),
+(25, 'English', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(26, 'Mathematics', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(27, 'Science', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(28, 'Filipino', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(29, 'Araling Panlipunan', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(30, 'MAPEH', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(31, 'TLE', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(32, 'Values Education', NULL, 10, NULL, '2026-02-26 14:12:54', NULL),
+(62, 'Basic Calculus', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56', NULL),
+(63, 'General Biology 1', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56', NULL),
+(64, 'General Mathematics', 'STEM Core', 11, 'STEM', '2026-02-28 14:43:56', NULL),
+(65, 'Physics 1', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56', NULL),
+(66, 'Pre-Calculus', 'STEM Specialization', 11, 'STEM', '2026-02-28 14:43:56', NULL),
+(67, 'Business Mathematics', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56', NULL),
+(68, 'Fundamentals of Accountancy', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56', NULL),
+(69, 'Organization & Management', 'ABM Specialization', 11, 'ABM', '2026-02-28 14:43:56', NULL),
+(70, 'Empowerment Technology', 'TVL Applied Subject', 11, 'TVL', '2026-02-28 14:43:56', NULL),
+(71, 'TVL-ICT', 'TVL Specialization', 11, 'TVL', '2026-02-28 14:43:56', NULL),
+(72, 'Basic Calculus', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32', NULL),
+(73, 'General Biology 2', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32', NULL),
+(74, 'General Mathematics', 'STEM Core', 12, 'STEM', '2026-02-28 14:44:32', NULL),
+(75, 'Physics 2', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32', NULL),
+(76, 'Pre-Calculus', 'STEM Specialization', 12, 'STEM', '2026-02-28 14:44:32', NULL),
+(77, 'Business Mathematics', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32', NULL),
+(78, 'Fundamentals of Accountancy', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32', NULL),
+(79, 'Organization & Management', 'ABM Specialization', 12, 'ABM', '2026-02-28 14:44:32', NULL),
+(80, 'Empowerment Technology', 'TVL Applied Subject', 12, 'TVL', '2026-02-28 14:44:32', NULL),
+(81, 'TVL-ICT', 'TVL Specialization', 12, 'TVL', '2026-02-28 14:44:32', NULL);
 
 -- --------------------------------------------------------
 
@@ -556,10 +576,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`, `status`, `email_verified`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$jZmCybtGmbJ3f0nnDC2/ouHzx9QXvnYiVEl/tkMRYKqRAWw2.nPbu', 'admin', 'active', 1, '2026-02-28 22:45:08', '2026-01-19 11:51:48', '2026-02-28 14:45:08'),
-(17, 'Charles Arias', 'ariascharles00@gmail.com', '$2y$10$sEovspLDwc7zCvzoVTwWpeYWAX/iZjX89peOJPKXIWTbO.1dPVxw2', 'super_admin', 'active', 0, '2026-02-27 19:32:56', '2026-02-24 02:39:34', '2026-02-27 11:32:56'),
-(27, 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '$2y$10$7.TA.OAUTHLS1sQan2LyI.ABDssmTC9IFFW2CAOk1j1k3nBlcztc2', 'student', 'active', 0, '2026-02-28 22:36:08', '2026-02-27 11:15:21', '2026-02-28 14:36:08'),
-(30, 'Gabriel A. Bayas', 'gbayas@dihs.edu.ph', '$2y$10$HT3lp7EQBPeY/nrMHdYdaOVfQehamwrIu3x3FfxnY5Fsg4SHr6iIW', 'faculty', 'active', 1, '2026-02-28 22:16:20', '2026-02-28 08:42:33', '2026-02-28 14:16:20');
+(2, 'System Admin', 'admin@dihs.edu.ph', '$2y$10$jZmCybtGmbJ3f0nnDC2/ouHzx9QXvnYiVEl/tkMRYKqRAWw2.nPbu', 'admin', 'active', 1, '2026-03-07 15:57:35', '2026-01-19 11:51:48', '2026-03-07 07:57:35'),
+(17, 'Charles Arias', 'ariascharles00@gmail.com', '$2y$10$sEovspLDwc7zCvzoVTwWpeYWAX/iZjX89peOJPKXIWTbO.1dPVxw2', 'super_admin', 'active', 0, '2026-03-01 17:24:47', '2026-02-24 02:39:34', '2026-03-01 09:24:47'),
+(27, 'Denise Alia Sernande', 'daasernande@dihs.edu.ph', '$2y$10$7.TA.OAUTHLS1sQan2LyI.ABDssmTC9IFFW2CAOk1j1k3nBlcztc2', 'student', 'active', 0, '2026-03-08 19:43:41', '2026-02-27 11:15:21', '2026-03-08 11:43:41'),
+(30, 'Gabriel A. Bayas', 'gbayas@dihs.edu.ph', '$2y$10$HT3lp7EQBPeY/nrMHdYdaOVfQehamwrIu3x3FfxnY5Fsg4SHr6iIW', 'faculty', 'active', 1, '2026-03-08 20:20:05', '2026-02-28 08:42:33', '2026-03-08 12:20:05');
 
 -- --------------------------------------------------------
 
@@ -666,7 +686,8 @@ ALTER TABLE `student_profiles`
 --
 ALTER TABLE `subjects`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_subject` (`name`,`grade_level`,`strand`);
+  ADD UNIQUE KEY `uq_subject` (`name`,`grade_level`,`strand`),
+  ADD KEY `fk_subject_course` (`course_id`);
 
 --
 -- Indexes for table `users`
@@ -702,13 +723,13 @@ ALTER TABLE `class_sections`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `course_offerings`
 --
 ALTER TABLE `course_offerings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=269;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=275;
 
 --
 -- AUTO_INCREMENT for table `departments`
@@ -720,13 +741,13 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `evaluations`
 --
 ALTER TABLE `evaluations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `faculty_assignments`
 --
 ALTER TABLE `faculty_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=218;
 
 --
 -- AUTO_INCREMENT for table `faculty_profiles`
@@ -796,6 +817,12 @@ ALTER TABLE `faculty_profiles`
 ALTER TABLE `student_profiles`
   ADD CONSTRAINT `student_profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `student_profiles_ibfk_2` FOREIGN KEY (`class_section_id`) REFERENCES `class_sections` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `subjects`
+--
+ALTER TABLE `subjects`
+  ADD CONSTRAINT `fk_subject_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `user_settings`

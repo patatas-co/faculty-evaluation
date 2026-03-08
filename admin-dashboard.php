@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-session_start();
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
 
@@ -17,15 +16,17 @@ if (!$currentUser || $currentUser['role'] !== 'admin') {
 if (isset($_GET['json']) && $_GET['json'] === 'teachers') {
     header('Content-Type: application/json');
     $teachers = $pdo->query(
-        "SELECT u.id, u.full_name, u.email, u.status,
-                p.employee_id, p.department, p.academic_rank,
-                COUNT(fa.id) AS assignment_count
-         FROM users u
-         LEFT JOIN faculty_profiles p  ON p.user_id = u.id
-         LEFT JOIN faculty_assignments fa ON fa.faculty_user_id = u.id
-         WHERE u.role = 'faculty'
-         GROUP BY u.id ORDER BY u.full_name"
-    )->fetchAll(PDO::FETCH_ASSOC);
+    "SELECT u.id, u.full_name, u.email, u.status,
+            p.employee_id, p.academic_rank,
+            d.name AS department,
+            COUNT(fa.id) AS assignment_count
+     FROM users u
+     LEFT JOIN faculty_profiles p ON p.user_id = u.id
+     LEFT JOIN departments d ON d.id = p.department_id
+     LEFT JOIN faculty_assignments fa ON fa.faculty_user_id = u.id
+     WHERE u.role = 'faculty'
+     GROUP BY u.id ORDER BY u.full_name"
+)->fetchAll(PDO::FETCH_ASSOC);
     $statsRow = $pdo->query(
         "SELECT
             (SELECT COUNT(*) FROM users WHERE role='faculty') AS teachers,
@@ -133,10 +134,15 @@ $departments     = $pdo->query("SELECT id, name FROM departments ORDER BY name")
 $courses         = $pdo->query("SELECT id, name FROM courses ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $sections        = $pdo->query("SELECT id, code, program, year_level, adviser_name FROM class_sections ORDER BY year_level, code")->fetchAll(PDO::FETCH_ASSOC);
 // Subjects with grade_level + strand for dynamic filtering in Add Teacher modal
+
 $subjectsForForm = [];
 try {
-    $subjectsForForm = $pdo->query("SELECT id, name, grade_level, strand FROM subjects ORDER BY grade_level, strand, name")->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) { $subjectsForForm = []; }
+    $subjectsForForm = $pdo->query(
+        "SELECT id, name, grade_level, strand FROM subjects ORDER BY grade_level, strand, name"
+    )->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $subjectsForForm = [];
+}
 
 // ── Subjects list ──
 $subjects = [];
@@ -270,8 +276,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $newUserId = (int)$pdo->lastInsertId();
 
                 // Insert faculty profile
-                $stmt = $pdo->prepare("INSERT INTO faculty_profiles (user_id, department_id, employee_id, academic_rank, status) VALUES (?,?,?,?,'Active')");
-                $stmt->execute([$newUserId, $deptId ?: null, $employeeId, $academicRank]);
+                $stmt = $pdo->prepare("INSERT INTO faculty_profiles (user_id, department_id, employee_id, academic_rank, grade_levels, course_program_teaching_and_section, status) VALUES (?,?,?,?,'','','Active')");
+$stmt->execute([$newUserId, $deptId ?: null, $employeeId, $academicRank]);
 
                 // Assign courses/subjects to sections (FK-safe)
                 if ($courseIds && $sectionIds) {
@@ -353,16 +359,30 @@ exit;
 
     // Delete teacher
     if ($action === 'delete_teacher') {
-        $uid = (int)($_POST['user_id'] ?? 0);
-        $pdo->prepare("DELETE FROM users WHERE id=? AND role='faculty'")->execute([$uid]);
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || isset($_POST['_fetch'])) {
-    header('Content-Type: application/json');
-    echo json_encode(['ok' => true]);
+    $uid = (int)($_POST['user_id'] ?? 0);
+
+    // Block deletion if this teacher has evaluation records
+    $evalCheck = $pdo->prepare(
+        "SELECT COUNT(*) FROM evaluations e
+         JOIN faculty_assignments fa ON fa.id = e.faculty_assignment_id
+         WHERE fa.faculty_user_id = ?"
+    );
+    $evalCheck->execute([$uid]);
+    if ($evalCheck->fetchColumn() > 0) {
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => false, 'message' => 'Cannot delete: this teacher has existing evaluation records.']);
+        exit;
+    }
+
+    $pdo->prepare("DELETE FROM users WHERE id=? AND role='faculty'")->execute([$uid]);
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || isset($_POST['_fetch'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => true]);
+        exit;
+    }
+    header('Location: admin-dashboard.php?tab=teachers&msg=deleted');
     exit;
 }
-header('Location: admin-dashboard.php?tab=teachers&msg=deleted');
-exit;
-    }
 
     // ── CSV Import ──
     if ($action === 'import_csv') {
@@ -435,8 +455,8 @@ exit;
                             $pdo->prepare("INSERT INTO users (full_name, email, password_hash, role, status, email_verified) VALUES (?,?,?,'faculty','active',1)")
                                 ->execute([$fullName, $email, $hash]);
                             $newUserId = (int)$pdo->lastInsertId();
-                            $pdo->prepare("INSERT INTO faculty_profiles (user_id, department_id, employee_id, academic_rank, status) VALUES (?,?,?,?,'Active')")
-                                ->execute([$newUserId, $deptId, $employeeId, $data['academic_rank'] ?? '']);
+                            $pdo->prepare("INSERT INTO faculty_profiles (user_id, department_id, employee_id, academic_rank, grade_levels, course_program_teaching_and_section, status) VALUES (?,?,?,?,'','','Active')")
+    ->execute([$newUserId, $deptId, $employeeId, $data['academic_rank'] ?? '']);
                             if ($courseIds && $sectionIds) {
                                 foreach ($courseIds as $cid) foreach ($sectionIds as $sid) {
                                     $coStmt->execute([$cid, $sid]);
