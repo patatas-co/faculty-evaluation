@@ -521,36 +521,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return `https://ui-avatars.com/api/?background=4caf50&color=fff&name=${encodeURIComponent(name || 'T')}`;
     }
 
-    function flashHTML() {
-        if (urlMsg === 'deleted') return `<div class="flash-msg success flash-auto-dismiss">Teacher deleted successfully.</div>`;
-        if (urlMsg === 'status_updated') return `<div class="flash-msg success flash-auto-dismiss">Teacher status updated.</div>`;
-        if (urlMsg === 'section_deleted') return `<div class="flash-msg success flash-auto-dismiss">Section deleted successfully.</div>`;
-        if (flash.success) return `<div class="flash-msg success flash-auto-dismiss">${flash.success}</div>`;
-        if (flash.error) return `<div class="flash-msg error flash-auto-dismiss">${flash.error}</div>`;
-        return '';
+    function showToast(message, type = 'success') {
+        const background = type === 'success'
+            ? 'linear-gradient(135deg, #22c55e, #16a34a)'
+            : 'linear-gradient(135deg, #ef4444, #dc2626)';
+        Toastify({
+            text: message,
+            duration: 1000,
+            gravity: 'top',
+            position: 'right',
+            stopOnFocus: true,
+            style: { background, borderRadius: '8px', fontFamily: 'Poppins, sans-serif', fontSize: '0.875rem', fontWeight: '500', padding: '12px 20px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' },
+        }).showToast();
     }
 
-    function dismissFlash() {
-        // Clear the variables so re-renders don't show it again
-        urlMsg = '';
-        flash = {};
+    function flashHTML() { return ''; }
 
+    function dismissFlash() {
         // Remove msg param from URL silently
         const url = new URL(window.location);
         url.searchParams.delete('msg');
         window.history.replaceState({}, '', url);
-
-        // Fade out and remove any visible flash messages
-        document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
-            el.style.transition = 'opacity 0.3s ease';
-            el.style.opacity = '0';
-            setTimeout(() => el.remove(), 800);
-        });
     }
 
-    // Auto-dismiss after 500ms whenever a flash is present
+    // Fire toasts for page-load flash messages
+    if (urlMsg === 'deleted') showToast('Teacher deleted successfully.');
+    if (urlMsg === 'status_updated') showToast('Teacher status updated.');
+    if (urlMsg === 'section_deleted') showToast('Section deleted successfully.');
+    if (flash.success) showToast(flash.success);
+    if (flash.error) showToast(flash.error, 'error');
+
     if (urlMsg || flash.success || flash.error) {
-        setTimeout(dismissFlash, 500);
+        urlMsg = '';
+        flash = {};
+        dismissFlash();
     }
 
     // Overview
@@ -761,9 +765,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (teacher) teacher.status = teacher.status === 'active' ? 'inactive' : 'active';
                     }
                 }
-                flash = { success: payload.action === 'toggle_status' ? 'Teacher status updated.' : 'Teacher deleted successfully.' };
+                flash = {};
+                showToast(payload.action === 'toggle_status' ? 'Teacher status updated.' : 'Teacher deleted successfully.');
                 renderTeachers();
-                setTimeout(dismissFlash, 800);
             });
     }
 
@@ -1129,8 +1133,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ── Shell HTML ────────────────────────────────────────────────────────────
 
+        if (urlMsg === 'subject_deleted') showToast('Subject deleted successfully.');
+
         content.innerHTML = `
-    ${urlMsg === 'subject_deleted' ? `<div class="flash-msg success flash-auto-dismiss">Subject deleted successfully.</div>` : ''}
     ${flashHTML()}
 
     <div class="subjects-filter-bar">
@@ -1426,11 +1431,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         wireDeleteBtns();
-
-        // Flash auto-dismiss
-        document.querySelectorAll('.flash-auto-dismiss').forEach(el => {
-            setTimeout(() => el.style.display = 'none', 4000);
-        });
     }
 });
 function toggleSections() {

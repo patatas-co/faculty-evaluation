@@ -749,6 +749,7 @@ if (!$encoded) $encoded = '{}';
     <link rel="stylesheet" href="css/student-dashboard.css"/>
     <link rel="stylesheet" href="css/admin-dashboard.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
     <script>
     (function() {
         if (localStorage.getItem('adminSidebarCollapsed') === 'true') {
@@ -1198,5 +1199,6 @@ if (!$encoded) $encoded = '{}';
 
 <script>window.__APP_DATA__ = <?= $encoded ?>;</script>
 <script src="js/admin-dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 </html>
